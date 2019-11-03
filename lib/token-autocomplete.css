@@ -1,3 +1,27 @@
-.token-autocomplete-input:empty::before {
+.token-autocomplete-container {
+    display: inline-flex;
+    border: 1px solid #E6E6E6;
+    background-color: #FFFFFF;
+}
+
+.token-autocomplete-container, .token-autocomplete-container * {
+    box-sizing: border-box;
+    font-family: -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,Oxygen-Sans,Ubuntu,Cantarell,"Helvetica Neue",sans-serif;
+}
+
+.token-autocomplete-container .token-autocomplete-input {
+    margin: 4px 2px;
+}
+
+.token-autocomplete-container .token-autocomplete-input:empty::before {
     content: attr(data-placeholder);
+}
+
+.token-autocomplete-container .token-autocomplete-tokens {
+    margin: 4px 2px;
+}
+
+.token-autocomplete-container .token-autocomplete-tokens span {
+    background-color: #E6E6E6;
+    margin: 4px 2px;
 }
