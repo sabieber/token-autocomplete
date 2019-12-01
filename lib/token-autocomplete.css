@@ -1,5 +1,6 @@
 .token-autocomplete-container {
     display: inline-flex;
+    flex-wrap: wrap;
     border: 1px solid #E6E6E6;
     background-color: #FFFFFF;
 }
