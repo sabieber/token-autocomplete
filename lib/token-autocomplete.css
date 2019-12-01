@@ -41,6 +41,15 @@
     cursor: pointer;
     font-size: 24px;
     line-height: 16px;
-    padding-left: 8px;
+    margin-left: 4px;
     pointer-events: auto;
+    border-radius: 50%;
+    height: 24px;
+    width: 24px;
+    display: inline-block;
+    text-align: center;
+}
+
+.token-autocomplete-container .token-autocomplete-token .token-autocomplete-token-delete:hover {
+    background-color: #e55858;
 }
