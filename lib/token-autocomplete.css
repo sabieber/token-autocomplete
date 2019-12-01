@@ -10,22 +10,34 @@
 }
 
 .token-autocomplete-container .token-autocomplete-input {
+    color: black;
+    font-size: 16px;
+    line-height: 32px;
     margin: 4px 2px;
+    padding: 0px 8px;
 }
 
 .token-autocomplete-container .token-autocomplete-input:empty::before {
     content: attr(data-placeholder);
+    color: rgb(0,0,0,0.6);
 }
 
 .token-autocomplete-container .token-autocomplete-tokens {
     margin: 4px 2px;
 }
 
-.token-autocomplete-container .token-autocomplete-tokens span {
+.token-autocomplete-container .token-autocomplete-tokens .token-autocomplete-token {
+    font-size: 16px;
+    line-height: 32px;
     background-color: #E6E6E6;
     margin: 4px 2px;
+    border-radius: 32px;
+    padding: 4px 8px;
 }
 
-.token-autocomplete-container .token-autocomplete-tokens span .token-autocomplete-token-delete {
+.token-autocomplete-container .token-autocomplete-tokens .token-autocomplete-token .token-autocomplete-token-delete {
     cursor: pointer;
+    font-size: 24px;
+    line-height: 16px;
+    padding-left: 8px;
 }
