@@ -20,11 +20,12 @@
 
     <script>
     
-    new TokenAutocomplete({
+    let tokenAutocomplete = new TokenAutocomplete({
         selector: '#sample',
         initialTokens: ['token1', 'token2', 'token3'],
         initialSuggestions: ['apple', 'banana', 'donut', 'pizza', 'burger', 'pancake']
     });
+    tokenAutocomplete.debug(true);
     
     </script>
 </body>
