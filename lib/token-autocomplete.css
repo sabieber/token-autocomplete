@@ -67,3 +67,7 @@
     padding: 8px;
     cursor: pointer;
 }
+
+.token-autocomplete-container .token-autocomplete-suggestions li.token-autocomplete-suggestion-highlighted {
+    background-color: #95caec;
+}
