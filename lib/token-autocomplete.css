@@ -68,6 +68,11 @@
     cursor: pointer;
 }
 
+.token-autocomplete-container .token-autocomplete-suggestions li.token-autocomplete-suggestion-active {
+    color: #747474;
+    background-color: #fdfdfd;
+}
+
 .token-autocomplete-container .token-autocomplete-suggestions li.token-autocomplete-suggestion-highlighted {
     background-color: #95caec;
 }
