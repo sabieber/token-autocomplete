@@ -1,13 +1,28 @@
+var __assign = (this && this.__assign) || function () {
+    __assign = Object.assign || function(t) {
+        for (var s, i = 1, n = arguments.length; i < n; i++) {
+            s = arguments[i];
+            for (var p in s) if (Object.prototype.hasOwnProperty.call(s, p))
+                t[p] = s[p];
+        }
+        return t;
+    };
+    return __assign.apply(this, arguments);
+};
 var TokenAutocomplete = /** @class */ (function () {
     function TokenAutocomplete(options) {
-        if (options === void 0) { options = {}; }
         this.defaults = {
+            selector: '',
             initialTokens: [],
             initialSuggestions: [],
             minCharactersForSuggestion: 1
         };
-        this.options = this.mergeOptions(this.defaults, options);
-        this.container = document.querySelector(this.options.selector);
+        this.options = __assign(__assign({}, this.defaults), options);
+        var passedContainer = document.querySelector(this.options.selector);
+        if (!passedContainer) {
+            throw new Error('passed selector does not point to a DOM element.');
+        }
+        this.container = passedContainer;
         this.container.classList.add('token-autocomplete-container');
         this.hiddenSelect = document.createElement('select');
         this.hiddenSelect.id = this.container.id + '-select';
@@ -16,7 +31,7 @@ var TokenAutocomplete = /** @class */ (function () {
         this.textInput.id = this.container.id + '-input';
         this.textInput.classList.add('token-autocomplete-input');
         this.textInput.setAttribute('data-placeholder', 'enter some text');
-        this.textInput.contentEditable = true;
+        this.textInput.contentEditable = 'true';
         this.suggestions = document.createElement('ul');
         this.suggestions.id = this.container.id + '-suggestions';
         this.suggestions.classList.add('token-autocomplete-suggestions');
@@ -55,9 +70,10 @@ var TokenAutocomplete = /** @class */ (function () {
             }
         });
         this.textInput.addEventListener('keyup', function (event) {
+            var _a, _b;
             if ((event.which == 38 || event.keyCode == 38) && me.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                var aboveSuggestion = highlightedSuggestion.previousSibling;
+                var aboveSuggestion = (_a = highlightedSuggestion) === null || _a === void 0 ? void 0 : _a.previousSibling;
                 if (aboveSuggestion !== null) {
                     me.highlightSuggestion(aboveSuggestion);
                 }
@@ -65,7 +81,7 @@ var TokenAutocomplete = /** @class */ (function () {
             }
             if ((event.which == 40 || event.keyCode == 40) && me.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                var belowSuggestion = highlightedSuggestion.nextSibling;
+                var belowSuggestion = (_b = highlightedSuggestion) === null || _b === void 0 ? void 0 : _b.nextSibling;
                 if (belowSuggestion !== null) {
                     me.highlightSuggestion(belowSuggestion);
                 }
@@ -73,11 +89,11 @@ var TokenAutocomplete = /** @class */ (function () {
             }
             me.hideSuggestions();
             me.clearSuggestions();
-            if (me.textInput.textContent.length >= me.options.minCharactersForSuggestion) {
-                var value_1 = me.textInput.textContent;
+            var value = me.textInput.textContent || '';
+            if (value.length >= me.options.minCharactersForSuggestion) {
                 if (Array.isArray(me.options.initialSuggestions)) {
                     me.options.initialSuggestions.forEach(function (suggestion) {
-                        if (typeof suggestion === 'string' && value_1 === suggestion.slice(0, value_1.length)) {
+                        if (typeof suggestion === 'string' && value === suggestion.slice(0, value.length)) {
                             me.addSuggestion(suggestion);
                         }
                     });
@@ -97,6 +113,9 @@ var TokenAutocomplete = /** @class */ (function () {
      * @param {string} tokenText - the name of the token to create
      */
     TokenAutocomplete.prototype.addToken = function (tokenText) {
+        if (tokenText === null) {
+            return;
+        }
         var option = document.createElement('option');
         option.text = tokenText;
         option.setAttribute('data-text', tokenText);
@@ -138,13 +157,17 @@ var TokenAutocomplete = /** @class */ (function () {
      * @param {Element} token - the token to remove
      */
     TokenAutocomplete.prototype.removeToken = function (token) {
+        var _a, _b;
         this.container.removeChild(token);
         var tokenText = token.getAttribute('data-text');
         var hiddenOption = this.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
-        hiddenOption.parentElement.removeChild(hiddenOption);
+        (_b = (_a = hiddenOption) === null || _a === void 0 ? void 0 : _a.parentElement) === null || _b === void 0 ? void 0 : _b.removeChild(hiddenOption);
         this.log('removed token', token.textContent);
     };
     TokenAutocomplete.prototype.removeTokenWithText = function (tokenText) {
+        if (tokenText === null) {
+            return;
+        }
         var token = this.container.querySelector('.token-autocomplete-token[data-text="' + tokenText + '"]');
         if (token !== null) {
             this.removeToken(token);
@@ -237,15 +260,6 @@ var TokenAutocomplete = /** @class */ (function () {
         this.suggestions.appendChild(option);
         this.showSuggestions();
         this.log('added suggestion', suggestionText);
-    };
-    TokenAutocomplete.prototype.mergeOptions = function (source, properties) {
-        var property;
-        for (property in properties) {
-            if (properties.hasOwnProperty(property)) {
-                source[property] = properties[property];
-            }
-        }
-        return source;
     };
     return TokenAutocomplete;
 }());

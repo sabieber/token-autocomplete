@@ -1,15 +1,35 @@
+interface Options {
+    selector: string,
+    initialTokens: Array<string>,
+    initialSuggestions: Array<string>,
+    minCharactersForSuggestion: number
+}
+
 class TokenAutocomplete {
 
-    defaults = {
+    options: Options;
+    container: any;
+    hiddenSelect: HTMLSelectElement;
+    textInput: HTMLSpanElement;
+    suggestions: HTMLUListElement;
+
+    defaults: Options = {
+        selector: '',
         initialTokens: [],
         initialSuggestions: [],
         minCharactersForSuggestion: 1
     };
+    log: any;
 
-    constructor(options = {}) {
-        this.options = this.mergeOptions(this.defaults, options);
+    constructor(options: Options) {
+        this.options = {...this.defaults, ...options};
 
-        this.container = document.querySelector(this.options.selector);
+        let passedContainer = document.querySelector(this.options.selector);
+        if (!passedContainer) {
+            throw new Error('passed selector does not point to a DOM element.');
+        }
+
+        this.container = passedContainer;
         this.container.classList.add('token-autocomplete-container');
 
         this.hiddenSelect = document.createElement('select');
@@ -20,7 +40,7 @@ class TokenAutocomplete {
         this.textInput.id = this.container.id + '-input';
         this.textInput.classList.add('token-autocomplete-input');
         this.textInput.setAttribute('data-placeholder', 'enter some text');
-        this.textInput.contentEditable = true;
+        this.textInput.contentEditable = 'true';
 
         this.suggestions = document.createElement('ul');
         this.suggestions.id = this.container.id + '-suggestions';
@@ -68,26 +88,26 @@ class TokenAutocomplete {
         this.textInput.addEventListener('keyup', function (event) {
             if ((event.which == 38 || event.keyCode == 38) && me.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                let aboveSuggestion = highlightedSuggestion.previousSibling;
+                let aboveSuggestion = highlightedSuggestion?.previousSibling;
                 if (aboveSuggestion !== null) {
-                    me.highlightSuggestion(aboveSuggestion);
+                    me.highlightSuggestion(aboveSuggestion as Element);
                 }
                 return;
             }
             if ((event.which == 40 || event.keyCode == 40) && me.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                let belowSuggestion = highlightedSuggestion.nextSibling;
+                let belowSuggestion = highlightedSuggestion?.nextSibling;
                 if (belowSuggestion !== null) {
-                    me.highlightSuggestion(belowSuggestion);
+                    me.highlightSuggestion(belowSuggestion as Element);
                 }
                 return;
             }
 
-
             me.hideSuggestions();
             me.clearSuggestions();
-            if (me.textInput.textContent.length >= me.options.minCharactersForSuggestion) {
-                let value = me.textInput.textContent;
+
+            let value = me.textInput.textContent || '';
+            if (value.length >= me.options.minCharactersForSuggestion) {
                 if (Array.isArray(me.options.initialSuggestions)) {
                     me.options.initialSuggestions.forEach(function (suggestion) {
                         if (typeof suggestion === 'string' && value === suggestion.slice(0, value.length)) {
@@ -102,7 +122,7 @@ class TokenAutocomplete {
             }
         });
 
-        this.container.tokenAutocomplete = this;
+        this.container.tokenAutocomplete = this as TokenAutocomplete;
     }
 
     /**
@@ -110,7 +130,10 @@ class TokenAutocomplete {
      * 
      * @param {string} tokenText - the name of the token to create
      */
-    addToken(tokenText) {
+    addToken(tokenText: string | null) {
+        if (tokenText === null) {
+            return;
+        }
         var option = document.createElement('option');
         option.text = tokenText;
         option.setAttribute('data-text', tokenText);
@@ -140,8 +163,8 @@ class TokenAutocomplete {
      * Completely clears the currently present tokens from the field.
      */
     removeAllTokens() {
-        let tokens = this.container.querySelectorAll('.token-autocomplete-token');
-
+        let tokens: NodeListOf<Element> = this.container.querySelectorAll('.token-autocomplete-token');
+ 
         let me = this;
         tokens.forEach(function (token) {me.removeToken(token);});
     }
@@ -161,17 +184,20 @@ class TokenAutocomplete {
      * 
      * @param {Element} token - the token to remove
      */
-    removeToken(token) {
+    removeToken(token: Element) {
         this.container.removeChild(token);
 
         let tokenText = token.getAttribute('data-text');
         let hiddenOption = this.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
-        hiddenOption.parentElement.removeChild(hiddenOption);
+        hiddenOption?.parentElement?.removeChild(hiddenOption);
         
         this.log('removed token', token.textContent);
     }
 
-    removeTokenWithText(tokenText) {
+    removeTokenWithText(tokenText: string | null) {
+        if (tokenText === null) {
+            return;
+        }
         let token = this.container.querySelector('.token-autocomplete-token[data-text="' + tokenText + '"]');
         if (token !== null) {
             this.removeToken(token);
@@ -183,7 +209,7 @@ class TokenAutocomplete {
      * 
      * @param {(Array\|string)} value - either the name of a single token or a list of tokens to create
      */
-    val(value) {
+    val(value: Array<String> | string) {
         this.removeAllTokens();
 
         if (Array.isArray(value)) {
@@ -214,7 +240,7 @@ class TokenAutocomplete {
         
     }
 
-    highlightSuggestionAtPosition(index) {
+    highlightSuggestionAtPosition(index: number) {
         let suggestions = this.suggestions.querySelectorAll('li');
         suggestions.forEach(function (suggestion) {
             suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
@@ -222,7 +248,7 @@ class TokenAutocomplete {
         suggestions[index].classList.add('token-autocomplete-suggestion-highlighted');
     }
 
-    highlightSuggestion(suggestion) {
+    highlightSuggestion(suggestion: Element) {
         this.suggestions.querySelectorAll('li').forEach(function (suggestion) {
             suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
         })
@@ -240,7 +266,7 @@ class TokenAutocomplete {
         this.textInput.textContent = '';
     }
 
-    debug(state) {
+    debug(state: boolean) {
         if (state) {
             this.log = console.log.bind(window.console);
         } else {
@@ -253,7 +279,7 @@ class TokenAutocomplete {
      * 
      * @param {string} suggestionText - the text that should be displayed for the added suggestion
      */
-    addSuggestion(suggestionText) {
+    addSuggestion(suggestionText: string) {
         var option = document.createElement('li');
         option.textContent = suggestionText;
 
@@ -277,15 +303,5 @@ class TokenAutocomplete {
         this.showSuggestions();
 
         this.log('added suggestion', suggestionText);
-    }
-
-    mergeOptions(source, properties) {
-        var property;
-        for (property in properties) {
-            if (properties.hasOwnProperty(property)) {
-                source[property] = properties[property];
-            }
-        }
-        return source;
     }
 }
