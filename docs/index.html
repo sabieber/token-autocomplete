@@ -16,11 +16,18 @@
     </style>
 </head>
 <body>
+    <form>
     <div id="sample"></div>
+        <div>
+            <button type="submit">Submit</button>
+        </div>
+    </form>
+    
 
     <script>
     
     let tokenAutocomplete = new TokenAutocomplete({
+        name: 'sample',
         selector: '#sample',
         initialTokens: ['token1', 'token2', 'token3'],
         initialSuggestions: ['apple', 'banana', 'donut', 'pizza', 'burger', 'pancake']
