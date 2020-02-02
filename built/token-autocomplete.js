@@ -14,8 +14,9 @@ var TokenAutocomplete = /** @class */ (function () {
         this.defaults = {
             name: '',
             selector: '',
-            initialTokens: [],
-            initialSuggestions: [],
+            noMatchesText: null,
+            initialTokens: null,
+            initialSuggestions: null,
             minCharactersForSuggestion: 1
         };
         this.options = __assign(__assign({}, this.defaults), options);
@@ -25,6 +26,9 @@ var TokenAutocomplete = /** @class */ (function () {
         }
         this.container = passedContainer;
         this.container.classList.add('token-autocomplete-container');
+        if (!Array.isArray(this.options.initialTokens) && !Array.isArray(this.options.initialSuggestions)) {
+            this.parseTokensAndSuggestions();
+        }
         this.hiddenSelect = document.createElement('select');
         this.hiddenSelect.id = this.container.id + '-select';
         this.hiddenSelect.name = this.options.name;
@@ -77,7 +81,7 @@ var TokenAutocomplete = /** @class */ (function () {
             if ((event.which == 38 || event.keyCode == 38) && me.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = (_a = highlightedSuggestion) === null || _a === void 0 ? void 0 : _a.previousSibling;
-                if (aboveSuggestion !== null) {
+                if (aboveSuggestion != null) {
                     me.highlightSuggestion(aboveSuggestion);
                 }
                 return;
@@ -85,7 +89,7 @@ var TokenAutocomplete = /** @class */ (function () {
             if ((event.which == 40 || event.keyCode == 40) && me.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var belowSuggestion = (_b = highlightedSuggestion) === null || _b === void 0 ? void 0 : _b.nextSibling;
-                if (belowSuggestion !== null) {
+                if (belowSuggestion != null) {
                     me.highlightSuggestion(belowSuggestion);
                 }
                 return;
@@ -103,6 +107,9 @@ var TokenAutocomplete = /** @class */ (function () {
                     if (me.suggestions.childNodes.length > 0) {
                         me.highlightSuggestionAtPosition(0);
                     }
+                    else if (me.options.noMatchesText) {
+                        me.addSuggestion(me.options.noMatchesText);
+                    }
                 }
             }
             else {
@@ -110,6 +117,23 @@ var TokenAutocomplete = /** @class */ (function () {
         });
         this.container.tokenAutocomplete = this;
     }
+    TokenAutocomplete.prototype.parseTokensAndSuggestions = function () {
+        this.options.initialTokens = [];
+        this.options.initialSuggestions = [];
+        var options = this.container.querySelectorAll('option');
+        var me = this;
+        options.forEach(function (option) {
+            var _a, _b;
+            var optionText = option.text;
+            if (optionText != null) {
+                if (option.hasAttribute('selected')) {
+                    (_a = me.options.initialTokens) === null || _a === void 0 ? void 0 : _a.push(optionText);
+                }
+                (_b = me.options.initialSuggestions) === null || _b === void 0 ? void 0 : _b.push(optionText);
+            }
+            me.container.removeChild(option);
+        });
+    };
     /**
      * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
      *
@@ -244,10 +268,16 @@ var TokenAutocomplete = /** @class */ (function () {
      * @param {string} suggestionText - the text that should be displayed for the added suggestion
      */
     TokenAutocomplete.prototype.addSuggestion = function (suggestionText) {
+        if (suggestionText === null) {
+            return;
+        }
         var option = document.createElement('li');
         option.textContent = suggestionText;
         var me = this;
         option.addEventListener('click', function (event) {
+            if (suggestionText == me.options.noMatchesText) {
+                return true;
+            }
             if (this.classList.contains('token-autocomplete-suggestion-active')) {
                 me.removeTokenWithText(suggestionText);
             }
