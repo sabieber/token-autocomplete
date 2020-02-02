@@ -18,6 +18,26 @@
 <body>
     <form>
     <div id="sample"></div>
+        <div id="sample2">
+            <option value="apple">
+                Apple
+            </option>
+            <option value="banana">
+                Banana
+            </option>
+            <option value="donut" selected="selected">
+                Donut
+            </option>
+            <option value="pizza">
+                Pizza
+            </option>
+            <option value="burger" selected="selected">
+                Burger
+            </option>
+            <option value="pancake">
+                Pancake
+            </option>
+        </div>
         <div>
             <button type="submit">Submit</button>
         </div>
@@ -34,6 +54,13 @@
         initialSuggestions: ['apple', 'banana', 'donut', 'pizza', 'burger', 'pancake']
     });
     tokenAutocomplete.debug(true);
+    
+    let tokenAutocomplete2 = new TokenAutocomplete({
+        name: 'sample2',
+        selector: '#sample2',
+        noMatchesText: 'No matching results...'
+    });
+    tokenAutocomplete2.debug(true);
     
     </script>
 </body>

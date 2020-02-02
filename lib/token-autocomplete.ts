@@ -2,8 +2,8 @@ interface Options {
     name: string,
     selector: string,
     noMatchesText: string | null,
-    initialTokens: Array<string>,
-    initialSuggestions: Array<string>,
+    initialTokens: Array<string> | null,
+    initialSuggestions: Array<string> | null,
     minCharactersForSuggestion: number
 }
 
@@ -19,8 +19,8 @@ class TokenAutocomplete {
         name: '',
         selector: '',
         noMatchesText: null,
-        initialTokens: [],
-        initialSuggestions: [],
+        initialTokens: null,
+        initialSuggestions: null,
         minCharactersForSuggestion: 1
     };
     log: any;
@@ -35,6 +35,10 @@ class TokenAutocomplete {
 
         this.container = passedContainer;
         this.container.classList.add('token-autocomplete-container');
+
+        if (!Array.isArray(this.options.initialTokens) && !Array.isArray(this.options.initialSuggestions)) {
+            this.parseTokensAndSuggestions();
+        }
 
         this.hiddenSelect = document.createElement('select');
         this.hiddenSelect.id = this.container.id + '-select';
@@ -131,6 +135,29 @@ class TokenAutocomplete {
         });
 
         this.container.tokenAutocomplete = this as TokenAutocomplete;
+    }
+
+    /**
+     * Searches the element given as a container for option elements and creates active tokens (when the option is marked selected)
+     * and suggestions (all options found) from these. During this all found options are removed from the DOM.
+     */
+    parseTokensAndSuggestions() {
+        this.options.initialTokens = [];
+        this.options.initialSuggestions = [];
+
+        let options: NodeListOf<HTMLOptionElement> = this.container.querySelectorAll('option');
+
+        let me = this;
+        options.forEach(function (option) {
+            let optionText = option.text;
+            if (optionText != null) {
+                if (option.hasAttribute('selected')) {
+                    me.options.initialTokens?.push(optionText);
+                }
+                me.options.initialSuggestions?.push(optionText);
+            }
+            me.container.removeChild(option);
+        });
     }
 
     /**
@@ -288,7 +315,10 @@ class TokenAutocomplete {
      * 
      * @param {string} suggestionText - the text that should be displayed for the added suggestion
      */
-    addSuggestion(suggestionText: string) {
+    addSuggestion(suggestionText: string | null) {
+        if (suggestionText === null) {
+            return;
+        }
         var option = document.createElement('li');
         option.textContent = suggestionText;
 
