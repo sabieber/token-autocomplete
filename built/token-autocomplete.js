@@ -12,6 +12,7 @@ var __assign = (this && this.__assign) || function () {
 var TokenAutocomplete = /** @class */ (function () {
     function TokenAutocomplete(options) {
         this.defaults = {
+            name: '',
             selector: '',
             initialTokens: [],
             initialSuggestions: [],
@@ -26,6 +27,8 @@ var TokenAutocomplete = /** @class */ (function () {
         this.container.classList.add('token-autocomplete-container');
         this.hiddenSelect = document.createElement('select');
         this.hiddenSelect.id = this.container.id + '-select';
+        this.hiddenSelect.name = this.options.name;
+        this.hiddenSelect.setAttribute('multiple', 'true');
         this.hiddenSelect.style.display = 'none';
         this.textInput = document.createElement('span');
         this.textInput.id = this.container.id + '-input';
@@ -118,6 +121,7 @@ var TokenAutocomplete = /** @class */ (function () {
         }
         var option = document.createElement('option');
         option.text = tokenText;
+        option.setAttribute('selected', 'true');
         option.setAttribute('data-text', tokenText);
         this.hiddenSelect.add(option);
         var token = document.createElement('span');
