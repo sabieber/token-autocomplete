@@ -1,6 +1,7 @@
 interface Options {
     name: string,
     selector: string,
+    noMatchesText: string | null,
     initialTokens: Array<string>,
     initialSuggestions: Array<string>,
     minCharactersForSuggestion: number
@@ -17,6 +18,7 @@ class TokenAutocomplete {
     defaults: Options = {
         name: '',
         selector: '',
+        noMatchesText: null,
         initialTokens: [],
         initialSuggestions: [],
         minCharactersForSuggestion: 1
@@ -93,7 +95,7 @@ class TokenAutocomplete {
             if ((event.which == 38 || event.keyCode == 38) && me.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
-                if (aboveSuggestion !== null) {
+                if (aboveSuggestion != null) {
                     me.highlightSuggestion(aboveSuggestion as Element);
                 }
                 return;
@@ -101,7 +103,7 @@ class TokenAutocomplete {
             if ((event.which == 40 || event.keyCode == 40) && me.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let belowSuggestion = highlightedSuggestion?.nextSibling;
-                if (belowSuggestion !== null) {
+                if (belowSuggestion != null) {
                     me.highlightSuggestion(belowSuggestion as Element);
                 }
                 return;
@@ -120,6 +122,8 @@ class TokenAutocomplete {
                     });
                     if (me.suggestions.childNodes.length > 0) {
                         me.highlightSuggestionAtPosition(0);
+                    } else if (me.options.noMatchesText) {
+                        me.addSuggestion(me.options.noMatchesText);
                     }
                 }
             } else {
@@ -290,6 +294,10 @@ class TokenAutocomplete {
 
         let me = this;
         option.addEventListener('click', function (event) {
+            if (suggestionText == me.options.noMatchesText) {
+                return true;
+            }
+
             if (this.classList.contains('token-autocomplete-suggestion-active')) {
                 me.removeTokenWithText(suggestionText);
             } else {
