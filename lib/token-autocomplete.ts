@@ -37,6 +37,7 @@ class TokenAutocomplete {
         this.hiddenSelect = document.createElement('select');
         this.hiddenSelect.id = this.container.id + '-select';
         this.hiddenSelect.name = this.options.name;
+        this.hiddenSelect.setAttribute('multiple', 'true');
         this.hiddenSelect.style.display = 'none';
 
         this.textInput = document.createElement('span');
@@ -139,6 +140,7 @@ class TokenAutocomplete {
         }
         var option = document.createElement('option');
         option.text = tokenText;
+        option.setAttribute('selected', 'true');
         option.setAttribute('data-text', tokenText);
         this.hiddenSelect.add(option);
 
