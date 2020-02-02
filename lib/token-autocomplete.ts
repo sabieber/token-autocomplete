@@ -1,4 +1,5 @@
 interface Options {
+    name: string,
     selector: string,
     initialTokens: Array<string>,
     initialSuggestions: Array<string>,
@@ -14,6 +15,7 @@ class TokenAutocomplete {
     suggestions: HTMLUListElement;
 
     defaults: Options = {
+        name: '',
         selector: '',
         initialTokens: [],
         initialSuggestions: [],
@@ -34,6 +36,7 @@ class TokenAutocomplete {
 
         this.hiddenSelect = document.createElement('select');
         this.hiddenSelect.id = this.container.id + '-select';
+        this.hiddenSelect.name = this.options.name;
         this.hiddenSelect.style.display = 'none';
 
         this.textInput = document.createElement('span');
