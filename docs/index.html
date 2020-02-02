@@ -6,7 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
     <title>Token Autocomplete Sample</title>
 
-    <script src="https://gitcdn.link/repo/sabieber/token-autocomplete/master/lib/token-autocomplete.js"></script>
+    <script src="https://gitcdn.link/repo/sabieber/token-autocomplete/master/built/token-autocomplete.js"></script>
     <link href="https://gitcdn.link/repo/sabieber/token-autocomplete/master/lib/token-autocomplete.css" rel="stylesheet" type="text/css" media="all">
 
     <style>
@@ -17,7 +17,7 @@
 </head>
 <body>
     <form>
-    <div id="sample"></div>
+        <div id="sample"></div>
         <div id="sample2">
             <option value="apple">
                 Apple
@@ -54,7 +54,7 @@
         initialSuggestions: ['apple', 'banana', 'donut', 'pizza', 'burger', 'pancake']
     });
     tokenAutocomplete.debug(true);
-    
+
     let tokenAutocomplete2 = new TokenAutocomplete({
         name: 'sample2',
         selector: '#sample2',
