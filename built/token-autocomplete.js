@@ -101,7 +101,12 @@ var TokenAutocomplete = /** @class */ (function () {
             if (value.length >= me.options.minCharactersForSuggestion) {
                 if (Array.isArray(me.options.initialSuggestions)) {
                     me.options.initialSuggestions.forEach(function (suggestion) {
-                        if (typeof suggestion === 'string' && value === suggestion.slice(0, value.length)) {
+                        if (typeof suggestion !== 'string') {
+                            // the suggestion is of wrong type and therefore ignored
+                            return;
+                        }
+                        if (value.localeCompare(suggestion.slice(0, value.length), undefined, { sensitivity: 'base' }) === 0) {
+                            // The suggestion starts with the query text the user entered and will be displayed
                             me.addSuggestion(suggestion);
                         }
                     });
