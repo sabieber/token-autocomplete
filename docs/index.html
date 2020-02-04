@@ -38,6 +38,7 @@
                 Pancake
             </option>
         </div>
+        <div id="sample3"></div>
         <div>
             <button type="submit">Submit</button>
         </div>
@@ -61,6 +62,14 @@
         noMatchesText: 'No matching results...'
     });
     tokenAutocomplete2.debug(true);
+    
+    let tokenAutocomplete3 = new TokenAutocomplete({
+        name: 'sample3',
+        selector: '#sample3',
+        noMatchesText: 'No matching results...',
+        suggestionsUri: 'http://www.mocky.io/v2/5e39dddf3200006f51ddfd74'
+    });
+    tokenAutocomplete3.debug(true);
     
     </script>
 </body>
