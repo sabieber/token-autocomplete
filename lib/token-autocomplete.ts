@@ -10,6 +10,11 @@ interface Options {
 
 class TokenAutocomplete {
 
+    KEY_BACKSPACE = 8;
+    KEY_ENTER = 13;
+    KEY_UP = 38;
+    KEY_DOWN = 40;
+
     options: Options;
     container: any;
     hiddenSelect: HTMLSelectElement;
@@ -75,7 +80,7 @@ class TokenAutocomplete {
         }
 
         this.textInput.addEventListener('keydown', function (event) {
-            if (event.which == 13 || event.keyCode == 13) {
+            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER) {
                 event.preventDefault();
                 
                 let highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
@@ -91,14 +96,14 @@ class TokenAutocomplete {
                 }
 
                 me.clearCurrentInput();
-            } else if (me.textInput.textContent === '' && (event.which == 8 || event.keyCode == 8)) {
+            } else if (me.textInput.textContent === '' && (event.which == me.KEY_BACKSPACE || event.keyCode == me.KEY_BACKSPACE)) {
                 event.preventDefault();
                 me.removeLastToken();
             }
         });
 
         this.textInput.addEventListener('keyup', function (event) {
-            if ((event.which == 38 || event.keyCode == 38) && me.suggestions.childNodes.length > 0) {
+            if ((event.which == me.KEY_UP || event.keyCode == me.KEY_UP) && me.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
                 if (aboveSuggestion != null) {
@@ -106,7 +111,7 @@ class TokenAutocomplete {
                 }
                 return;
             }
-            if ((event.which == 40 || event.keyCode == 40) && me.suggestions.childNodes.length > 0) {
+            if ((event.which == me.KEY_DOWN || event.keyCode == me.KEY_DOWN) && me.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let belowSuggestion = highlightedSuggestion?.nextSibling;
                 if (belowSuggestion != null) {

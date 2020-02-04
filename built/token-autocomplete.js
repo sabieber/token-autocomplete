@@ -11,6 +11,10 @@ var __assign = (this && this.__assign) || function () {
 };
 var TokenAutocomplete = /** @class */ (function () {
     function TokenAutocomplete(options) {
+        this.KEY_BACKSPACE = 8;
+        this.KEY_ENTER = 13;
+        this.KEY_UP = 38;
+        this.KEY_DOWN = 40;
         this.defaults = {
             name: '',
             selector: '',
@@ -56,7 +60,7 @@ var TokenAutocomplete = /** @class */ (function () {
             });
         }
         this.textInput.addEventListener('keydown', function (event) {
-            if (event.which == 13 || event.keyCode == 13) {
+            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER) {
                 event.preventDefault();
                 var highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
@@ -72,14 +76,14 @@ var TokenAutocomplete = /** @class */ (function () {
                 }
                 me.clearCurrentInput();
             }
-            else if (me.textInput.textContent === '' && (event.which == 8 || event.keyCode == 8)) {
+            else if (me.textInput.textContent === '' && (event.which == me.KEY_BACKSPACE || event.keyCode == me.KEY_BACKSPACE)) {
                 event.preventDefault();
                 me.removeLastToken();
             }
         });
         this.textInput.addEventListener('keyup', function (event) {
             var _a, _b;
-            if ((event.which == 38 || event.keyCode == 38) && me.suggestions.childNodes.length > 0) {
+            if ((event.which == me.KEY_UP || event.keyCode == me.KEY_UP) && me.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = (_a = highlightedSuggestion) === null || _a === void 0 ? void 0 : _a.previousSibling;
                 if (aboveSuggestion != null) {
@@ -87,7 +91,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 }
                 return;
             }
-            if ((event.which == 40 || event.keyCode == 40) && me.suggestions.childNodes.length > 0) {
+            if ((event.which == me.KEY_DOWN || event.keyCode == me.KEY_DOWN) && me.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var belowSuggestion = (_b = highlightedSuggestion) === null || _b === void 0 ? void 0 : _b.nextSibling;
                 if (belowSuggestion != null) {
