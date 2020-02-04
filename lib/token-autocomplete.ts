@@ -4,6 +4,7 @@ interface Options {
     noMatchesText: string | null,
     initialTokens: Array<string> | null,
     initialSuggestions: Array<string> | null,
+    suggestionsUri: string, 
     minCharactersForSuggestion: number
 }
 
@@ -21,6 +22,7 @@ class TokenAutocomplete {
         noMatchesText: null,
         initialTokens: null,
         initialSuggestions: null,
+        suggestionsUri: '',
         minCharactersForSuggestion: 1
     };
     log: any;
@@ -129,8 +131,9 @@ class TokenAutocomplete {
                     } else if (me.options.noMatchesText) {
                         me.addSuggestion(me.options.noMatchesText);
                     }
+                } else if (me.options.suggestionsUri.length > 0) {
+                    me.requestSuggestions(value);
                 }
-            } else {
             }
         });
 
@@ -142,8 +145,8 @@ class TokenAutocomplete {
      * and suggestions (all options found) from these. During this all found options are removed from the DOM.
      */
     parseTokensAndSuggestions() {
-        this.options.initialTokens = [];
-        this.options.initialSuggestions = [];
+        let initialTokens: Array<string> = [];
+        let initialSuggestions: Array<string> = [];
 
         let options: NodeListOf<HTMLOptionElement> = this.container.querySelectorAll('option');
 
@@ -152,12 +155,40 @@ class TokenAutocomplete {
             let optionText = option.text;
             if (optionText != null) {
                 if (option.hasAttribute('selected')) {
-                    me.options.initialTokens?.push(optionText);
+                    initialTokens.push(optionText);
                 }
-                me.options.initialSuggestions?.push(optionText);
+                initialSuggestions.push(optionText);
             }
             me.container.removeChild(option);
         });
+
+        if (initialTokens.length > 0) {
+            this.options.initialTokens = initialTokens;
+        }
+        if (initialSuggestions.length > 0) {
+            this.options.initialSuggestions = initialSuggestions;
+        }
+    }
+
+    /**
+     * Loads suggestions matching the given query from the rest service behind the URI given as an option while initializing the field.
+     * 
+     * @param query the query to search suggestions for
+     */
+    requestSuggestions(query: string) {
+        let me = this;
+        let request = new XMLHttpRequest();
+        request.onload = function() {
+            if (Array.isArray(request.response)) {
+                request.response.forEach(function (suggestion) {
+                   me.addSuggestion(suggestion.text); 
+                });
+            }
+        };
+        request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
+        request.responseType = 'json';
+        request.setRequestHeader('Content-type', 'application/json');
+        request.send();
     }
 
     /**

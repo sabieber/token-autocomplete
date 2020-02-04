@@ -17,6 +17,7 @@ var TokenAutocomplete = /** @class */ (function () {
             noMatchesText: null,
             initialTokens: null,
             initialSuggestions: null,
+            suggestionsUri: '',
             minCharactersForSuggestion: 1
         };
         this.options = __assign(__assign({}, this.defaults), options);
@@ -111,28 +112,58 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.addSuggestion(me.options.noMatchesText);
                     }
                 }
-            }
-            else {
+                else if (me.options.suggestionsUri.length > 0) {
+                    me.requestSuggestions(value);
+                }
             }
         });
         this.container.tokenAutocomplete = this;
     }
+    /**
+     * Searches the element given as a container for option elements and creates active tokens (when the option is marked selected)
+     * and suggestions (all options found) from these. During this all found options are removed from the DOM.
+     */
     TokenAutocomplete.prototype.parseTokensAndSuggestions = function () {
-        this.options.initialTokens = [];
-        this.options.initialSuggestions = [];
+        var initialTokens = [];
+        var initialSuggestions = [];
         var options = this.container.querySelectorAll('option');
         var me = this;
         options.forEach(function (option) {
-            var _a, _b;
             var optionText = option.text;
             if (optionText != null) {
                 if (option.hasAttribute('selected')) {
-                    (_a = me.options.initialTokens) === null || _a === void 0 ? void 0 : _a.push(optionText);
+                    initialTokens.push(optionText);
                 }
-                (_b = me.options.initialSuggestions) === null || _b === void 0 ? void 0 : _b.push(optionText);
+                initialSuggestions.push(optionText);
             }
             me.container.removeChild(option);
         });
+        if (initialTokens.length > 0) {
+            this.options.initialTokens = initialTokens;
+        }
+        if (initialSuggestions.length > 0) {
+            this.options.initialSuggestions = initialSuggestions;
+        }
+    };
+    /**
+     * Loads suggestions matching the given query from the rest service behind the URI given as an option while initializing the field.
+     *
+     * @param query the query to search suggestions for
+     */
+    TokenAutocomplete.prototype.requestSuggestions = function (query) {
+        var me = this;
+        var request = new XMLHttpRequest();
+        request.onload = function () {
+            if (Array.isArray(request.response)) {
+                request.response.forEach(function (suggestion) {
+                    me.addSuggestion(suggestion.text);
+                });
+            }
+        };
+        request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
+        request.responseType = 'json';
+        request.setRequestHeader('Content-type', 'application/json');
+        request.send();
     };
     /**
      * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
