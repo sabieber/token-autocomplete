@@ -54,8 +54,19 @@
         name: 'sample',
         selector: '#sample',
         noMatchesText: 'No matching results...',
-        initialTokens: ['token1', 'token2', 'token3'],
-        initialSuggestions: ['apple', 'banana', 'donut', 'pizza', 'burger', 'pancake']
+        initialTokens: [
+            {value: 'apple', text: 'Apple'},
+            {value: 'banana', text: 'Banana'},
+            {value: 'pancake', text: 'Pancake'}
+        ],
+        initialSuggestions: [
+            {value: 'apple', text: 'Apple'},
+            {value: 'banana', text: 'Banana'},
+            {value: 'donut', text: 'Donut'},
+            {value: 'pizza', text: 'Pizza'},
+            {value: 'burger', text: 'Burger'},
+            {value: 'pancake', text: 'Pancake'}
+        ]
     });
     tokenAutocomplete.debug(true);
 

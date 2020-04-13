@@ -54,8 +54,8 @@ var TokenAutocomplete = /** @class */ (function () {
         var me = this;
         if (Array.isArray(this.options.initialTokens)) {
             this.options.initialTokens.forEach(function (token) {
-                if (typeof token === 'string') {
-                    me.addToken(token);
+                if (typeof token === 'object') {
+                    me.addToken(token.value, token.text);
                 }
             });
         }
@@ -68,11 +68,11 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.removeTokenWithText(highlightedSuggestion.textContent);
                     }
                     else {
-                        me.addToken(highlightedSuggestion.textContent);
+                        me.addToken(highlightedSuggestion.getAttribute('data-value'), highlightedSuggestion.textContent);
                     }
                 }
                 else {
-                    me.addToken(me.textInput.textContent);
+                    me.addToken(me.textInput.textContent, me.textInput.textContent);
                 }
                 me.clearCurrentInput();
             }
@@ -105,20 +105,20 @@ var TokenAutocomplete = /** @class */ (function () {
             if (value.length >= me.options.minCharactersForSuggestion) {
                 if (Array.isArray(me.options.initialSuggestions)) {
                     me.options.initialSuggestions.forEach(function (suggestion) {
-                        if (typeof suggestion !== 'string') {
+                        if (typeof suggestion !== 'object') {
                             // the suggestion is of wrong type and therefore ignored
                             return;
                         }
-                        if (value.localeCompare(suggestion.slice(0, value.length), undefined, { sensitivity: 'base' }) === 0) {
+                        if (value.localeCompare(suggestion.text.slice(0, value.length), undefined, { sensitivity: 'base' }) === 0) {
                             // The suggestion starts with the query text the user entered and will be displayed
-                            me.addSuggestion(suggestion);
+                            me.addSuggestion(suggestion.value, suggestion.text);
                         }
                     });
                     if (me.suggestions.childNodes.length > 0) {
                         me.highlightSuggestionAtPosition(0);
                     }
                     else if (me.options.noMatchesText) {
-                        me.addSuggestion(me.options.noMatchesText);
+                        me.addSuggestion('_no_match_', me.options.noMatchesText);
                     }
                 }
                 else if (me.options.suggestionsUri.length > 0) {
@@ -138,12 +138,11 @@ var TokenAutocomplete = /** @class */ (function () {
         var options = this.container.querySelectorAll('option');
         var me = this;
         options.forEach(function (option) {
-            var optionText = option.text;
-            if (optionText != null) {
+            if (option.text != null) {
                 if (option.hasAttribute('selected')) {
-                    initialTokens.push(optionText);
+                    initialTokens.push({ value: option.value, text: option.text });
                 }
-                initialSuggestions.push(optionText);
+                initialSuggestions.push({ value: option.value, text: option.text });
             }
             me.container.removeChild(option);
         });
@@ -165,7 +164,7 @@ var TokenAutocomplete = /** @class */ (function () {
         request.onload = function () {
             if (Array.isArray(request.response)) {
                 request.response.forEach(function (suggestion) {
-                    me.addSuggestion(suggestion.text);
+                    me.addSuggestion(suggestion.id, suggestion.text);
                 });
             }
         };
@@ -179,18 +178,21 @@ var TokenAutocomplete = /** @class */ (function () {
      *
      * @param {string} tokenText - the name of the token to create
      */
-    TokenAutocomplete.prototype.addToken = function (tokenText) {
-        if (tokenText === null) {
+    TokenAutocomplete.prototype.addToken = function (tokenValue, tokenText) {
+        if (tokenValue === null || tokenText === null) {
             return;
         }
         var option = document.createElement('option');
         option.text = tokenText;
+        option.value = tokenValue;
         option.setAttribute('selected', 'true');
         option.setAttribute('data-text', tokenText);
+        option.setAttribute('data-value', tokenValue);
         this.hiddenSelect.add(option);
         var token = document.createElement('span');
         token.classList.add('token-autocomplete-token');
         token.setAttribute('data-text', tokenText);
+        option.setAttribute('data-value', tokenValue);
         token.textContent = tokenText;
         var deleteToken = document.createElement('span');
         deleteToken.classList.add('token-autocomplete-token-delete');
@@ -251,13 +253,13 @@ var TokenAutocomplete = /** @class */ (function () {
         if (Array.isArray(value)) {
             var me_1 = this;
             value.forEach(function (token) {
-                if (typeof token === 'string') {
-                    me_1.addToken(token);
+                if (typeof token === 'object') {
+                    me_1.addToken(token.value, token.text);
                 }
             });
         }
         else {
-            this.addToken(value);
+            this.addToken(value.value, value.text);
         }
     };
     /**
@@ -307,12 +309,13 @@ var TokenAutocomplete = /** @class */ (function () {
      *
      * @param {string} suggestionText - the text that should be displayed for the added suggestion
      */
-    TokenAutocomplete.prototype.addSuggestion = function (suggestionText) {
-        if (suggestionText === null) {
+    TokenAutocomplete.prototype.addSuggestion = function (suggestionValue, suggestionText) {
+        if (suggestionText === null || suggestionValue === null) {
             return;
         }
         var option = document.createElement('li');
         option.textContent = suggestionText;
+        option.setAttribute('data-value', suggestionValue);
         var me = this;
         option.addEventListener('click', function (event) {
             if (suggestionText == me.options.noMatchesText) {
@@ -322,7 +325,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 me.removeTokenWithText(suggestionText);
             }
             else {
-                me.addToken(suggestionText);
+                me.addToken(suggestionValue, suggestionText);
             }
             me.clearSuggestions();
             me.hideSuggestions();

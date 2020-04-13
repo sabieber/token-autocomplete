@@ -1,9 +1,20 @@
+interface Token {
+    value: string,
+    text: string 
+}
+
+interface Suggestion {
+    value: string,
+    text: string 
+}
+
+
 interface Options {
     name: string,
     selector: string,
     noMatchesText: string | null,
-    initialTokens: Array<string> | null,
-    initialSuggestions: Array<string> | null,
+    initialTokens: Array<Token> | null,
+    initialSuggestions: Array<Suggestion> | null,
     suggestionsUri: string, 
     minCharactersForSuggestion: number
 }
@@ -73,8 +84,8 @@ class TokenAutocomplete {
 
         if (Array.isArray(this.options.initialTokens)) {
             this.options.initialTokens.forEach(function (token) {
-                if (typeof token === 'string') {
-                    me.addToken(token);
+                if (typeof token === 'object') {
+                    me.addToken(token.value, token.text);
                 }                
             });
         }
@@ -88,11 +99,11 @@ class TokenAutocomplete {
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
                         me.removeTokenWithText(highlightedSuggestion.textContent);
                     } else {
-                        me.addToken(highlightedSuggestion.textContent);
+                        me.addToken(highlightedSuggestion.getAttribute('data-value'), highlightedSuggestion.textContent);
                     }
                     
                 } else {
-                    me.addToken(me.textInput.textContent);
+                    me.addToken(me.textInput.textContent, me.textInput.textContent);
                 }
 
                 me.clearCurrentInput();
@@ -127,19 +138,19 @@ class TokenAutocomplete {
             if (value.length >= me.options.minCharactersForSuggestion) {
                 if (Array.isArray(me.options.initialSuggestions)) {
                     me.options.initialSuggestions.forEach(function (suggestion) {
-                        if (typeof suggestion !== 'string') {
+                        if (typeof suggestion !== 'object') {
                             // the suggestion is of wrong type and therefore ignored
                             return;
                         }
-                        if (value.localeCompare(suggestion.slice(0, value.length), undefined, {sensitivity: 'base'}) === 0) {
+                        if (value.localeCompare(suggestion.text.slice(0, value.length), undefined, {sensitivity: 'base'}) === 0) {
                             // The suggestion starts with the query text the user entered and will be displayed
-                            me.addSuggestion(suggestion);
+                            me.addSuggestion(suggestion.value, suggestion.text);
                         }                
                     });
                     if (me.suggestions.childNodes.length > 0) {
                         me.highlightSuggestionAtPosition(0);
                     } else if (me.options.noMatchesText) {
-                        me.addSuggestion(me.options.noMatchesText);
+                        me.addSuggestion('_no_match_', me.options.noMatchesText);
                     }
                 } else if (me.options.suggestionsUri.length > 0) {
                     me.requestSuggestions(value);
@@ -155,19 +166,18 @@ class TokenAutocomplete {
      * and suggestions (all options found) from these. During this all found options are removed from the DOM.
      */
     parseTokensAndSuggestions() {
-        let initialTokens: Array<string> = [];
-        let initialSuggestions: Array<string> = [];
+        let initialTokens: Array<Token> = [];
+        let initialSuggestions: Array<Suggestion> = [];
 
         let options: NodeListOf<HTMLOptionElement> = this.container.querySelectorAll('option');
 
         let me = this;
         options.forEach(function (option) {
-            let optionText = option.text;
-            if (optionText != null) {
+            if (option.text != null) {
                 if (option.hasAttribute('selected')) {
-                    initialTokens.push(optionText);
+                    initialTokens.push({value: option.value, text: option.text});
                 }
-                initialSuggestions.push(optionText);
+                initialSuggestions.push({value: option.value, text: option.text});
             }
             me.container.removeChild(option);
         });
@@ -191,7 +201,7 @@ class TokenAutocomplete {
         request.onload = function() {
             if (Array.isArray(request.response)) {
                 request.response.forEach(function (suggestion) {
-                   me.addSuggestion(suggestion.text); 
+                   me.addSuggestion(suggestion.id, suggestion.text); 
                 });
             }
         };
@@ -206,19 +216,22 @@ class TokenAutocomplete {
      * 
      * @param {string} tokenText - the name of the token to create
      */
-    addToken(tokenText: string | null) {
-        if (tokenText === null) {
+    addToken(tokenValue: string | null, tokenText: string | null) {
+        if (tokenValue === null || tokenText === null) {
             return;
         }
         var option = document.createElement('option');
         option.text = tokenText;
+        option.value = tokenValue;
         option.setAttribute('selected', 'true');
         option.setAttribute('data-text', tokenText);
+        option.setAttribute('data-value', tokenValue);
         this.hiddenSelect.add(option);
 
         var token = document.createElement('span');
         token.classList.add('token-autocomplete-token');
         token.setAttribute('data-text', tokenText);
+        option.setAttribute('data-value', tokenValue);
         token.textContent = tokenText;
 
         var deleteToken = document.createElement('span');
@@ -286,18 +299,18 @@ class TokenAutocomplete {
      * 
      * @param {(Array\|string)} value - either the name of a single token or a list of tokens to create
      */
-    val(value: Array<String> | string) {
+    val(value: Array<Token> | Token) {
         this.removeAllTokens();
 
         if (Array.isArray(value)) {
             let me = this;
             value.forEach(function (token) {
-                if (typeof token === 'string') {
-                    me.addToken(token);
+                if (typeof token === 'object') {
+                    me.addToken(token.value, token.text);
                 }                
             });
         } else {
-            this.addToken(value);
+            this.addToken(value.value, value.text);
         }
     }
 
@@ -356,12 +369,13 @@ class TokenAutocomplete {
      * 
      * @param {string} suggestionText - the text that should be displayed for the added suggestion
      */
-    addSuggestion(suggestionText: string | null) {
-        if (suggestionText === null) {
+    addSuggestion(suggestionValue: string | null, suggestionText: string | null) {
+        if (suggestionText === null || suggestionValue === null) {
             return;
         }
         var option = document.createElement('li');
         option.textContent = suggestionText;
+        option.setAttribute('data-value', suggestionValue);
 
         let me = this;
         option.addEventListener('click', function (event) {
@@ -372,7 +386,7 @@ class TokenAutocomplete {
             if (this.classList.contains('token-autocomplete-suggestion-active')) {
                 me.removeTokenWithText(suggestionText);
             } else {
-                me.addToken(suggestionText);
+                me.addToken(suggestionValue, suggestionText);
             }
             me.clearSuggestions();
             me.hideSuggestions();
