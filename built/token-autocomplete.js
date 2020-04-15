@@ -46,8 +46,8 @@ var TokenAutocomplete = /** @class */ (function () {
         this.textInput.contentEditable = 'true';
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
-        this.select = new TokenAutocomplete.MultiSelect(this, this.container, this.options);
-        this.autocomplete = new TokenAutocomplete.Autocomplete(this, this.container, this.options);
+        this.select = new TokenAutocomplete.MultiSelect(this);
+        this.autocomplete = new TokenAutocomplete.Autocomplete(this);
         this.debug(false);
         var me = this;
         if (Array.isArray(this.options.initialTokens)) {
@@ -182,10 +182,10 @@ var TokenAutocomplete = /** @class */ (function () {
         }
     };
     TokenAutocomplete.MultiSelect = /** @class */ (function () {
-        function class_1(parent, container, options) {
+        function class_1(parent) {
             this.parent = parent;
-            this.container = container;
-            this.options = options;
+            this.container = parent.container;
+            this.options = parent.options;
         }
         /**
          * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
@@ -260,14 +260,14 @@ var TokenAutocomplete = /** @class */ (function () {
         return class_1;
     }());
     TokenAutocomplete.Autocomplete = /** @class */ (function () {
-        function class_2(parent, container, options) {
+        function class_2(parent) {
             this.parent = parent;
-            this.container = container;
-            this.options = options;
+            this.container = parent.container;
+            this.options = parent.options;
             this.suggestions = document.createElement('ul');
-            this.suggestions.id = container.id + '-suggestions';
+            this.suggestions.id = this.container.id + '-suggestions';
             this.suggestions.classList.add('token-autocomplete-suggestions');
-            container.appendChild(this.suggestions);
+            this.container.appendChild(this.suggestions);
         }
         /**
          * Hides the suggestions dropdown from the user.

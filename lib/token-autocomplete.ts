@@ -99,8 +99,8 @@ class TokenAutocomplete {
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
 
-        this.select = new TokenAutocomplete.MultiSelect(this, this.container, this.options);
-        this.autocomplete = new TokenAutocomplete.Autocomplete(this, this.container, this.options);
+        this.select = new TokenAutocomplete.MultiSelect(this);
+        this.autocomplete = new TokenAutocomplete.Autocomplete(this);
 
         this.debug(false);
 
@@ -252,10 +252,10 @@ class TokenAutocomplete {
         container: any;
         options: Options;
 
-        constructor(parent:TokenAutocomplete, container: any, options: Options) {
+        constructor(parent:TokenAutocomplete) {
             this.parent = parent;
-            this.container = container;
-            this.options = options;
+            this.container = parent.container;
+            this.options = parent.options;
         }
 
         /**
@@ -348,16 +348,16 @@ class TokenAutocomplete {
         options: Options;
         suggestions: HTMLUListElement;
 
-        constructor(parent:TokenAutocomplete, container: any, options: Options) {
+        constructor(parent:TokenAutocomplete) {
             this.parent = parent;
-            this.container = container;
-            this.options = options;
+            this.container = parent.container;
+            this.options = parent.options;
 
             this.suggestions = document.createElement('ul');
-            this.suggestions.id = container.id + '-suggestions';
+            this.suggestions.id = this.container.id + '-suggestions';
             this.suggestions.classList.add('token-autocomplete-suggestions');
             
-            container.appendChild(this.suggestions);
+            this.container.appendChild(this.suggestions);
         }
 
         /**
