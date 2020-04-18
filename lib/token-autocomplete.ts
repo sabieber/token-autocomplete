@@ -5,7 +5,8 @@ interface Token {
 
 interface Suggestion {
     value: string,
-    text: string
+    text: string,
+    description: string | null
 }
 
 interface Options {
@@ -173,7 +174,7 @@ class TokenAutocomplete {
                     if (me.autocomplete.suggestions.childNodes.length > 0) {
                         me.autocomplete.highlightSuggestionAtPosition(0);
                     } else if (me.options.noMatchesText) {
-                        me.autocomplete.addSuggestion({value: '_no_match_', text: me.options.noMatchesText});
+                        me.autocomplete.addSuggestion({value: '_no_match_', text: me.options.noMatchesText, description: null});
                     }
                 } else if (me.options.suggestionsUri.length > 0) {
                     me.autocomplete.requestSuggestions(value);
@@ -200,7 +201,7 @@ class TokenAutocomplete {
                 if (option.hasAttribute('selected')) {
                     initialTokens.push({value: option.value, text: option.text});
                 }
-                initialSuggestions.push({value: option.value, text: option.text});
+                initialSuggestions.push({value: option.value, text: option.text, description: null});
             }
             me.container.removeChild(option);
         });
@@ -425,6 +426,13 @@ class TokenAutocomplete {
             var option = document.createElement('li');
             option.textContent = suggestion.text;
             option.setAttribute('data-value', suggestion.value);
+
+            if (suggestion.description) {
+                var description = document.createElement('small');
+                description.textContent = suggestion.description;
+                description.classList.add('token-autocomplete-suggestion-description');
+                option.appendChild(description);
+            }
 
             let me = this;
             option.addEventListener('click', function (event) {

@@ -76,3 +76,9 @@
 .token-autocomplete-container .token-autocomplete-suggestions li.token-autocomplete-suggestion-highlighted {
     background-color: #95caec;
 }
+
+.token-autocomplete-container .token-autocomplete-suggestions li .token-autocomplete-suggestion-description {
+    display:block;
+    font-size: 0.7em;
+    color: #808080;
+}

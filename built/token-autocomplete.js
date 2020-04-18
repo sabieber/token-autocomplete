@@ -116,7 +116,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.autocomplete.highlightSuggestionAtPosition(0);
                     }
                     else if (me.options.noMatchesText) {
-                        me.autocomplete.addSuggestion({ value: '_no_match_', text: me.options.noMatchesText });
+                        me.autocomplete.addSuggestion({ value: '_no_match_', text: me.options.noMatchesText, description: null });
                     }
                 }
                 else if (me.options.suggestionsUri.length > 0) {
@@ -140,7 +140,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 if (option.hasAttribute('selected')) {
                     initialTokens.push({ value: option.value, text: option.text });
                 }
-                initialSuggestions.push({ value: option.value, text: option.text });
+                initialSuggestions.push({ value: option.value, text: option.text, description: null });
             }
             me.container.removeChild(option);
         });
@@ -329,6 +329,12 @@ var TokenAutocomplete = /** @class */ (function () {
             var option = document.createElement('li');
             option.textContent = suggestion.text;
             option.setAttribute('data-value', suggestion.value);
+            if (suggestion.description) {
+                var description = document.createElement('small');
+                description.textContent = suggestion.description;
+                description.classList.add('token-autocomplete-suggestion-description');
+                option.appendChild(description);
+            }
             var me = this;
             option.addEventListener('click', function (event) {
                 if (suggestion.text == me.options.noMatchesText) {
