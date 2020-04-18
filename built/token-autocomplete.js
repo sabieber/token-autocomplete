@@ -109,14 +109,14 @@ var TokenAutocomplete = /** @class */ (function () {
                         }
                         if (value.localeCompare(suggestion.text.slice(0, value.length), undefined, { sensitivity: 'base' }) === 0) {
                             // The suggestion starts with the query text the user entered and will be displayed
-                            me.autocomplete.addSuggestion(suggestion.value, suggestion.text);
+                            me.autocomplete.addSuggestion(suggestion);
                         }
                     });
                     if (me.autocomplete.suggestions.childNodes.length > 0) {
                         me.autocomplete.highlightSuggestionAtPosition(0);
                     }
                     else if (me.options.noMatchesText) {
-                        me.autocomplete.addSuggestion('_no_match_', me.options.noMatchesText);
+                        me.autocomplete.addSuggestion({ value: '_no_match_', text: me.options.noMatchesText });
                     }
                 }
                 else if (me.options.suggestionsUri.length > 0) {
@@ -311,7 +311,7 @@ var TokenAutocomplete = /** @class */ (function () {
             request.onload = function () {
                 if (Array.isArray(request.response)) {
                     request.response.forEach(function (suggestion) {
-                        me.addSuggestion(suggestion.id, suggestion.text);
+                        me.addSuggestion(suggestion);
                     });
                 }
             };
@@ -325,34 +325,31 @@ var TokenAutocomplete = /** @class */ (function () {
          *
          * @param {string} suggestionText - the text that should be displayed for the added suggestion
          */
-        class_2.prototype.addSuggestion = function (suggestionValue, suggestionText) {
-            if (suggestionText === null || suggestionValue === null) {
-                return;
-            }
+        class_2.prototype.addSuggestion = function (suggestion) {
             var option = document.createElement('li');
-            option.textContent = suggestionText;
-            option.setAttribute('data-value', suggestionValue);
+            option.textContent = suggestion.text;
+            option.setAttribute('data-value', suggestion.value);
             var me = this;
             option.addEventListener('click', function (event) {
-                if (suggestionText == me.options.noMatchesText) {
+                if (suggestion.text == me.options.noMatchesText) {
                     return true;
                 }
                 if (this.classList.contains('token-autocomplete-suggestion-active')) {
-                    me.parent.select.removeTokenWithText(suggestionText);
+                    me.parent.select.removeTokenWithText(suggestion.text);
                 }
                 else {
-                    me.parent.select.addToken(suggestionValue, suggestionText);
+                    me.parent.select.addToken(suggestion.value, suggestion.text);
                 }
                 me.clearSuggestions();
                 me.hideSuggestions();
                 me.parent.clearCurrentInput();
             });
-            if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestionText + '"]') !== null) {
+            if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestion.text + '"]') !== null) {
                 option.classList.add('token-autocomplete-suggestion-active');
             }
             this.suggestions.appendChild(option);
             this.showSuggestions();
-            me.parent.log('added suggestion', suggestionText);
+            me.parent.log('added suggestion', suggestion);
         };
         return class_2;
     }());
