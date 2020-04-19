@@ -22,6 +22,7 @@ var TokenAutocomplete = /** @class */ (function () {
             initialTokens: null,
             initialSuggestions: null,
             suggestionsUri: '',
+            suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
             minCharactersForSuggestion: 1
         };
         this.options = __assign(__assign({}, this.defaults), options);
@@ -181,6 +182,7 @@ var TokenAutocomplete = /** @class */ (function () {
             this.log = function () { };
         }
     };
+    var _a;
     TokenAutocomplete.MultiSelect = /** @class */ (function () {
         function class_1(parent) {
             this.parent = parent;
@@ -259,106 +261,112 @@ var TokenAutocomplete = /** @class */ (function () {
         };
         return class_1;
     }());
-    TokenAutocomplete.Autocomplete = /** @class */ (function () {
-        function class_2(parent) {
-            this.parent = parent;
-            this.container = parent.container;
-            this.options = parent.options;
-            this.suggestions = document.createElement('ul');
-            this.suggestions.id = this.container.id + '-suggestions';
-            this.suggestions.classList.add('token-autocomplete-suggestions');
-            this.container.appendChild(this.suggestions);
-        }
-        /**
-         * Hides the suggestions dropdown from the user.
-         */
-        class_2.prototype.hideSuggestions = function () {
-            this.suggestions.style.display = '';
-        };
-        /**
-         * Shows the suggestions dropdown to the user.
-         */
-        class_2.prototype.showSuggestions = function () {
-            this.suggestions.style.display = 'block';
-        };
-        class_2.prototype.highlightSuggestionAtPosition = function (index) {
-            var suggestions = this.suggestions.querySelectorAll('li');
-            suggestions.forEach(function (suggestion) {
-                suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
-            });
-            suggestions[index].classList.add('token-autocomplete-suggestion-highlighted');
-        };
-        class_2.prototype.highlightSuggestion = function (suggestion) {
-            this.suggestions.querySelectorAll('li').forEach(function (suggestion) {
-                suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
-            });
-            suggestion.classList.add('token-autocomplete-suggestion-highlighted');
-        };
-        /**
-         * Removes all previous suggestions from the dropdown.
-         */
-        class_2.prototype.clearSuggestions = function () {
-            this.suggestions.innerHTML = '';
-        };
-        /**
-         * Loads suggestions matching the given query from the rest service behind the URI given as an option while initializing the field.
-         *
-         * @param query the query to search suggestions for
-         */
-        class_2.prototype.requestSuggestions = function (query) {
-            var me = this;
-            var request = new XMLHttpRequest();
-            request.onload = function () {
-                if (Array.isArray(request.response)) {
-                    request.response.forEach(function (suggestion) {
-                        me.addSuggestion(suggestion);
-                    });
-                }
+    TokenAutocomplete.Autocomplete = (_a = /** @class */ (function () {
+            function class_2(parent) {
+                this.parent = parent;
+                this.container = parent.container;
+                this.options = parent.options;
+                this.renderer = parent.options.suggestionRenderer;
+                this.suggestions = document.createElement('ul');
+                this.suggestions.id = this.container.id + '-suggestions';
+                this.suggestions.classList.add('token-autocomplete-suggestions');
+                this.container.appendChild(this.suggestions);
+            }
+            /**
+             * Hides the suggestions dropdown from the user.
+             */
+            class_2.prototype.hideSuggestions = function () {
+                this.suggestions.style.display = '';
             };
-            request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
-            request.responseType = 'json';
-            request.setRequestHeader('Content-type', 'application/json');
-            request.send();
-        };
-        /**
-         * Adds a suggestion with the given text matching the users input to the dropdown.
-         *
-         * @param {string} suggestionText - the text that should be displayed for the added suggestion
-         */
-        class_2.prototype.addSuggestion = function (suggestion) {
+            /**
+             * Shows the suggestions dropdown to the user.
+             */
+            class_2.prototype.showSuggestions = function () {
+                this.suggestions.style.display = 'block';
+            };
+            class_2.prototype.highlightSuggestionAtPosition = function (index) {
+                var suggestions = this.suggestions.querySelectorAll('li');
+                suggestions.forEach(function (suggestion) {
+                    suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+                });
+                suggestions[index].classList.add('token-autocomplete-suggestion-highlighted');
+            };
+            class_2.prototype.highlightSuggestion = function (suggestion) {
+                this.suggestions.querySelectorAll('li').forEach(function (suggestion) {
+                    suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+                });
+                suggestion.classList.add('token-autocomplete-suggestion-highlighted');
+            };
+            /**
+             * Removes all previous suggestions from the dropdown.
+             */
+            class_2.prototype.clearSuggestions = function () {
+                this.suggestions.innerHTML = '';
+            };
+            /**
+             * Loads suggestions matching the given query from the rest service behind the URI given as an option while initializing the field.
+             *
+             * @param query the query to search suggestions for
+             */
+            class_2.prototype.requestSuggestions = function (query) {
+                var me = this;
+                var request = new XMLHttpRequest();
+                request.onload = function () {
+                    if (Array.isArray(request.response)) {
+                        request.response.forEach(function (suggestion) {
+                            me.addSuggestion(suggestion);
+                        });
+                    }
+                };
+                request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
+                request.responseType = 'json';
+                request.setRequestHeader('Content-type', 'application/json');
+                request.send();
+            };
+            /**
+             * Adds a suggestion with the given text matching the users input to the dropdown.
+             *
+             * @param {string} suggestionText - the text that should be displayed for the added suggestion
+             */
+            class_2.prototype.addSuggestion = function (suggestion) {
+                var element = this.renderer(suggestion);
+                element.setAttribute('data-value', suggestion.value);
+                var me = this;
+                element.addEventListener('click', function (_event) {
+                    if (suggestion.text == me.options.noMatchesText) {
+                        return true;
+                    }
+                    if (element.classList.contains('token-autocomplete-suggestion-active')) {
+                        me.parent.select.removeTokenWithText(suggestion.text);
+                    }
+                    else {
+                        me.parent.select.addToken(suggestion.value, suggestion.text);
+                    }
+                    me.clearSuggestions();
+                    me.hideSuggestions();
+                    me.parent.clearCurrentInput();
+                });
+                if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestion.text + '"]') !== null) {
+                    element.classList.add('token-autocomplete-suggestion-active');
+                }
+                this.suggestions.appendChild(element);
+                this.showSuggestions();
+                me.parent.log('added suggestion', suggestion);
+            };
+            return class_2;
+        }()),
+        _a.defaultRenderer = function (suggestion) {
             var option = document.createElement('li');
             option.textContent = suggestion.text;
-            option.setAttribute('data-value', suggestion.value);
             if (suggestion.description) {
                 var description = document.createElement('small');
                 description.textContent = suggestion.description;
                 description.classList.add('token-autocomplete-suggestion-description');
                 option.appendChild(description);
             }
-            var me = this;
-            option.addEventListener('click', function (event) {
-                if (suggestion.text == me.options.noMatchesText) {
-                    return true;
-                }
-                if (this.classList.contains('token-autocomplete-suggestion-active')) {
-                    me.parent.select.removeTokenWithText(suggestion.text);
-                }
-                else {
-                    me.parent.select.addToken(suggestion.value, suggestion.text);
-                }
-                me.clearSuggestions();
-                me.hideSuggestions();
-                me.parent.clearCurrentInput();
-            });
-            if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestion.text + '"]') !== null) {
-                option.classList.add('token-autocomplete-suggestion-active');
-            }
-            this.suggestions.appendChild(option);
-            this.showSuggestions();
-            me.parent.log('added suggestion', suggestion);
-        };
-        return class_2;
-    }());
+            return option;
+        },
+        _a);
     return TokenAutocomplete;
 }());
 //# sourceMappingURL=token-autocomplete.js.map

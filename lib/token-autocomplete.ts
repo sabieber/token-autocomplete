@@ -16,6 +16,7 @@ interface Options {
     initialTokens: Array<Token> | null,
     initialSuggestions: Array<Suggestion> | null,
     suggestionsUri: string, 
+    suggestionRenderer: SuggestionRenderer,
     minCharactersForSuggestion: number
 }
 
@@ -43,6 +44,10 @@ interface Autocomplete {
     highlightSuggestion(arg0: Element): void;
 }
 
+interface SuggestionRenderer {
+    (suggestion: Suggestion): HTMLElement;
+}
+
 class TokenAutocomplete {
 
     KEY_BACKSPACE = 8;
@@ -65,6 +70,7 @@ class TokenAutocomplete {
         initialTokens: null,
         initialSuggestions: null,
         suggestionsUri: '',
+        suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
         minCharactersForSuggestion: 1
     };
     log: any;
@@ -347,11 +353,13 @@ class TokenAutocomplete {
         container: any;
         options: Options;
         suggestions: HTMLUListElement;
+        renderer: SuggestionRenderer;
 
         constructor(parent:TokenAutocomplete) {
             this.parent = parent;
             this.container = parent.container;
             this.options = parent.options;
+            this.renderer = parent.options.suggestionRenderer;
 
             this.suggestions = document.createElement('ul');
             this.suggestions.id = this.container.id + '-suggestions';
@@ -423,24 +431,17 @@ class TokenAutocomplete {
          * @param {string} suggestionText - the text that should be displayed for the added suggestion
          */
         addSuggestion(suggestion: Suggestion) {
-            var option = document.createElement('li');
-            option.textContent = suggestion.text;
-            option.setAttribute('data-value', suggestion.value);
-
-            if (suggestion.description) {
-                var description = document.createElement('small');
-                description.textContent = suggestion.description;
-                description.classList.add('token-autocomplete-suggestion-description');
-                option.appendChild(description);
-            }
+            let element = this.renderer(suggestion);
+            
+            element.setAttribute('data-value', suggestion.value);
 
             let me = this;
-            option.addEventListener('click', function (event) {
+            element.addEventListener('click', function (_event: Event) {
                 if (suggestion.text == me.options.noMatchesText) {
                     return true;
                 }
 
-                if (this.classList.contains('token-autocomplete-suggestion-active')) {
+                if (element.classList.contains('token-autocomplete-suggestion-active')) {
                     me.parent.select.removeTokenWithText(suggestion.text);
                 } else {
                     me.parent.select.addToken(suggestion.value, suggestion.text);
@@ -451,13 +452,27 @@ class TokenAutocomplete {
             });
 
             if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestion.text + '"]') !== null) {
-                option.classList.add('token-autocomplete-suggestion-active');
+                element.classList.add('token-autocomplete-suggestion-active');
             }
 
-            this.suggestions.appendChild(option);
+            this.suggestions.appendChild(element);
             this.showSuggestions();
 
             me.parent.log('added suggestion', suggestion);
+        }
+
+        static defaultRenderer: SuggestionRenderer = function (suggestion: Suggestion): HTMLElement {
+            var option = document.createElement('li');
+            option.textContent = suggestion.text;
+
+            if (suggestion.description) {
+                var description = document.createElement('small');
+                description.textContent = suggestion.description;
+                description.classList.add('token-autocomplete-suggestion-description');
+                option.appendChild(description);
+            }
+
+            return option;
         }
     }
 }

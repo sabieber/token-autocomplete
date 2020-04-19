@@ -42,6 +42,8 @@
         </div>
         <h1>Suggestions via service URI:</h1>
         <div id="sample3"></div>
+        <h1>Custom suggestion renderer:</h1>
+        <div id="sample4"></div>
         <div>
             <button type="submit">Submit</button>
         </div>
@@ -60,12 +62,12 @@
             {value: 'pancake', text: 'Pancake'}
         ],
         initialSuggestions: [
-            {value: 'apple', text: 'Apple'},
-            {value: 'banana', text: 'Banana'},
-            {value: 'donut', text: 'Donut'},
-            {value: 'pizza', text: 'Pizza'},
-            {value: 'burger', text: 'Burger'},
-            {value: 'pancake', text: 'Pancake'}
+            {value: 'apple', text: 'Apple', description: 'Fruit'},
+            {value: 'banana', text: 'Banana', description: 'Fruit'},
+            {value: 'donut', text: 'Donut', description: 'Sweet'},
+            {value: 'pizza', text: 'Pizza', description: 'Cheesy'},
+            {value: 'burger', text: 'Burger', description: 'Meaty'},
+            {value: 'pancake', text: 'Pancake', description: 'Sweet'}
         ]
     });
     tokenAutocomplete.debug(true);
@@ -76,14 +78,49 @@
         noMatchesText: 'No matching results...'
     });
     tokenAutocomplete2.debug(true);
-    
+
     let tokenAutocomplete3 = new TokenAutocomplete({
         name: 'sample3',
         selector: '#sample3',
         noMatchesText: 'No matching results...',
-        suggestionsUri: 'http://www.mocky.io/v2/5e39dddf3200006f51ddfd74'
+        suggestionsUri: 'https://www.mocky.io/v2/5e9773c83000008b00b6deac'
     });
     tokenAutocomplete3.debug(true);
+
+    let tokenAutocomplete4 = new TokenAutocomplete({
+        name: 'sample4',
+        selector: '#sample4',
+        noMatchesText: 'No matching results...',
+        initialTokens: [
+            {value: 'apple', text: 'Apple'},
+            {value: 'banana', text: 'Banana'},
+            {value: 'pancake', text: 'Pancake'}
+        ],
+        initialSuggestions: [
+            {value: 'apple', text: 'Apple', description: 'Fruit'},
+            {value: 'banana', text: 'Banana', description: 'Fruit'},
+            {value: 'donut', text: 'Donut', description: 'Sweet'},
+            {value: 'pizza', text: 'Pizza', description: 'Cheesy'},
+            {value: 'burger', text: 'Burger', description: 'Meaty'},
+            {value: 'pancake', text: 'Pancake', description: 'Sweet'}
+        ],
+        suggestionRenderer: function (suggestion) {
+            var option = document.createElement('li');
+
+            var text = document.createElement('strong');
+            text.textContent = suggestion.text;
+            option.appendChild(text);
+
+            if (suggestion.description) {
+                var description = document.createElement('span');
+                description.textContent = ' (' + suggestion.description + ')';
+                option.appendChild(description);
+            }
+
+            return option;
+        }
+    });
+    tokenAutocomplete4.debug(true);
     
     </script>
 </body>
