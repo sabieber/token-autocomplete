@@ -298,6 +298,8 @@ class TokenAutocomplete {
             });
 
             this.container.insertBefore(token, this.parent.textInput);
+
+            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: this.currentTokens()}));
             
             this.parent.log('added token', token);
         }
@@ -332,6 +334,8 @@ class TokenAutocomplete {
             let tokenText = token.getAttribute('data-text');
             let hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
             hiddenOption?.parentElement?.removeChild(hiddenOption);
+
+            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: this.currentTokens()}));
             
             this.parent.log('removed token', token.textContent);
         }
@@ -344,6 +348,16 @@ class TokenAutocomplete {
             if (token !== null) {
                 this.removeToken(token);
             }
+        }
+
+        currentTokens() {
+            let tokens: string[] = [];
+            this.parent.hiddenSelect.querySelectorAll('option').forEach(function (option) {
+                if (option.dataset.value != null) {
+                    tokens.push(option.dataset.value);
+                }
+            })
+            return tokens;
         }
     }
 
