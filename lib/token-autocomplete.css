@@ -14,6 +14,7 @@
     color: black;
     font-size: 16px;
     line-height: 32px;
+    outline: none;
     margin: 4px 2px;
     padding: 0px 8px;
 }
