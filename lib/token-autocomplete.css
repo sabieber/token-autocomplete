@@ -26,6 +26,7 @@
 .token-autocomplete-container .token-autocomplete-token {
     font-size: 16px;
     line-height: 32px;
+    color: rgb(0,0,0,0.6);
     background-color: #E6E6E6;
     margin: 4px 2px;
     border-radius: 32px;
