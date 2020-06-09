@@ -19,6 +19,7 @@ var TokenAutocomplete = /** @class */ (function () {
             name: '',
             selector: '',
             noMatchesText: null,
+            placeholderText: 'enter some text',
             initialTokens: null,
             initialSuggestions: null,
             suggestionsUri: '',
@@ -43,7 +44,9 @@ var TokenAutocomplete = /** @class */ (function () {
         this.textInput = document.createElement('span');
         this.textInput.id = this.container.id + '-input';
         this.textInput.classList.add('token-autocomplete-input');
-        this.textInput.setAttribute('data-placeholder', 'enter some text');
+        if (this.options.placeholderText != null) {
+            this.textInput.setAttribute('data-placeholder', this.options.placeholderText);
+        }
         this.textInput.contentEditable = 'true';
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
