@@ -13,6 +13,7 @@ interface Options {
     name: string,
     selector: string,
     noMatchesText: string | null,
+    placeholderText: string | null,
     initialTokens: Array<Token> | null,
     initialSuggestions: Array<Suggestion> | null,
     suggestionsUri: string, 
@@ -67,6 +68,7 @@ class TokenAutocomplete {
         name: '',
         selector: '',
         noMatchesText: null,
+        placeholderText: 'enter some text',
         initialTokens: null,
         initialSuggestions: null,
         suggestionsUri: '',
@@ -99,7 +101,9 @@ class TokenAutocomplete {
         this.textInput = document.createElement('span');
         this.textInput.id = this.container.id + '-input';
         this.textInput.classList.add('token-autocomplete-input');
-        this.textInput.setAttribute('data-placeholder', 'enter some text');
+        if (this.options.placeholderText != null) {
+            this.textInput.setAttribute('data-placeholder', this.options.placeholderText);
+        }
         this.textInput.contentEditable = 'true';
 
         this.container.appendChild(this.textInput);
