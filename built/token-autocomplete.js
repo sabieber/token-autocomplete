@@ -13,6 +13,7 @@ var TokenAutocomplete = /** @class */ (function () {
     function TokenAutocomplete(options) {
         this.KEY_BACKSPACE = 8;
         this.KEY_ENTER = 13;
+        this.KEY_TAB = 9;
         this.KEY_UP = 38;
         this.KEY_DOWN = 40;
         this.defaults = {
@@ -23,6 +24,7 @@ var TokenAutocomplete = /** @class */ (function () {
             initialTokens: null,
             initialSuggestions: null,
             suggestionsUri: '',
+            suggestionsUriBuilder: function (query) { return this.suggestionsUri + '?query=' + query; },
             suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
             minCharactersForSuggestion: 1
         };
@@ -62,7 +64,7 @@ var TokenAutocomplete = /** @class */ (function () {
             });
         }
         this.textInput.addEventListener('keydown', function (event) {
-            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER) {
+            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER || event.which == me.KEY_TAB || event.keyCode == me.KEY_TAB) {
                 event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
@@ -325,13 +327,20 @@ var TokenAutocomplete = /** @class */ (function () {
                 var me = this;
                 var request = new XMLHttpRequest();
                 request.onload = function () {
-                    if (Array.isArray(request.response)) {
-                        request.response.forEach(function (suggestion) {
+                    if (Array.isArray(request.response.completions)) {
+                        request.response.completions.forEach(function (suggestion) {
                             me.addSuggestion(suggestion);
                         });
+                        if (me.suggestions.childNodes.length > 0) {
+                            me.highlightSuggestionAtPosition(0);
+                        }
+                        else if (me.options.noMatchesText) {
+                            me.addSuggestion({ value: '_no_match_', text: me.options.noMatchesText, description: null });
+                        }
                     }
                 };
-                request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
+                var suggestionsUri = me.options.suggestionsUriBuilder(query);
+                request.open('GET', suggestionsUri, true);
                 request.responseType = 'json';
                 request.setRequestHeader('Content-type', 'application/json');
                 request.send();

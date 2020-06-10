@@ -16,7 +16,8 @@ interface Options {
     placeholderText: string | null,
     initialTokens: Array<Token> | null,
     initialSuggestions: Array<Suggestion> | null,
-    suggestionsUri: string, 
+    suggestionsUri: string,
+    suggestionsUriBuilder: SuggestionUriBuilder,
     suggestionRenderer: SuggestionRenderer,
     minCharactersForSuggestion: number
 }
@@ -49,10 +50,15 @@ interface SuggestionRenderer {
     (suggestion: Suggestion): HTMLElement;
 }
 
+interface SuggestionUriBuilder {
+    (query: string): string;
+}
+
 class TokenAutocomplete {
 
     KEY_BACKSPACE = 8;
     KEY_ENTER = 13;
+    KEY_TAB = 9;
     KEY_UP = 38;
     KEY_DOWN = 40;
 
@@ -72,6 +78,7 @@ class TokenAutocomplete {
         initialTokens: null,
         initialSuggestions: null,
         suggestionsUri: '',
+        suggestionsUriBuilder: function (query) { return this.suggestionsUri + '?query=' + query },
         suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
         minCharactersForSuggestion: 1
     };
@@ -125,7 +132,7 @@ class TokenAutocomplete {
         }
 
         this.textInput.addEventListener('keydown', function (event) {
-            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER) {
+            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER || event.which == me.KEY_TAB || event.keyCode == me.KEY_TAB) {
                 event.preventDefault();
                 
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
@@ -135,7 +142,6 @@ class TokenAutocomplete {
                     } else {
                         me.select.addToken(highlightedSuggestion.getAttribute('data-value'), highlightedSuggestion.textContent);
                     }
-                    
                 } else {
                     me.select.addToken(me.textInput.textContent, me.textInput.textContent);
                 }
@@ -431,13 +437,19 @@ class TokenAutocomplete {
             let me = this;
             let request = new XMLHttpRequest();
             request.onload = function() {
-                if (Array.isArray(request.response)) {
-                    request.response.forEach(function (suggestion) {
-                    me.addSuggestion(suggestion); 
+                if (Array.isArray(request.response.completions)) {
+                    request.response.completions.forEach(function (suggestion: Suggestion) {
+                        me.addSuggestion(suggestion); 
                     });
+                    if (me.suggestions.childNodes.length > 0) {
+                        me.highlightSuggestionAtPosition(0);
+                    } else if (me.options.noMatchesText) {
+                        me.addSuggestion({value: '_no_match_', text: me.options.noMatchesText, description: null});
+                    }
                 }
             };
-            request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
+            let suggestionsUri = me.options.suggestionsUriBuilder(query);
+            request.open('GET', suggestionsUri, true);
             request.responseType = 'json';
             request.setRequestHeader('Content-type', 'application/json');
             request.send();
