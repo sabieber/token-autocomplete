@@ -16,7 +16,8 @@ interface Options {
     placeholderText: string | null,
     initialTokens: Array<Token> | null,
     initialSuggestions: Array<Suggestion> | null,
-    suggestionsUri: string, 
+    suggestionsUri: string,
+    suggestionsUriBuilder: SuggestionUriBuilder,
     suggestionRenderer: SuggestionRenderer,
     minCharactersForSuggestion: number
 }
@@ -49,6 +50,10 @@ interface SuggestionRenderer {
     (suggestion: Suggestion): HTMLElement;
 }
 
+interface SuggestionUriBuilder {
+    (query: string): string;
+}
+
 class TokenAutocomplete {
 
     KEY_BACKSPACE = 8;
@@ -72,6 +77,7 @@ class TokenAutocomplete {
         initialTokens: null,
         initialSuggestions: null,
         suggestionsUri: '',
+        suggestionsUriBuilder: function (query) { return this.suggestionsUri + '?query=' + query },
         suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
         minCharactersForSuggestion: 1
     };
@@ -437,7 +443,8 @@ class TokenAutocomplete {
                     });
                 }
             };
-            request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
+            let suggestionsUri = me.options.suggestionsUriBuilder(query);
+            request.open('GET', suggestionsUri, true);
             request.responseType = 'json';
             request.setRequestHeader('Content-type', 'application/json');
             request.send();
