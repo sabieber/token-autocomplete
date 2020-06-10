@@ -24,6 +24,7 @@ var TokenAutocomplete = /** @class */ (function () {
             initialTokens: null,
             initialSuggestions: null,
             suggestionsUri: '',
+            suggestionsUriBuilder: function (query) { return this.suggestionsUri + '?query=' + query; },
             suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
             minCharactersForSuggestion: 1
         };
@@ -338,7 +339,8 @@ var TokenAutocomplete = /** @class */ (function () {
                         }
                     }
                 };
-                request.open('GET', me.options.suggestionsUri + '?query=' + query, true);
+                var suggestionsUri = me.options.suggestionsUriBuilder(query);
+                request.open('GET', suggestionsUri, true);
                 request.responseType = 'json';
                 request.setRequestHeader('Content-type', 'application/json');
                 request.send();
