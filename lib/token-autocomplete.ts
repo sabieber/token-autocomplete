@@ -59,11 +59,11 @@ interface SuggestionUriBuilder {
 
 class TokenAutocomplete {
 
-    KEY_BACKSPACE = 8;
-    KEY_ENTER = 13;
-    KEY_TAB = 9;
-    KEY_UP = 38;
-    KEY_DOWN = 40;
+    KEY_BACKSPACE = 'Backspace';
+    KEY_ENTER = 'Enter';
+    KEY_TAB = 'Tab';
+    KEY_UP = 'ArrowUp';
+    KEY_DOWN = 'ArrowDown';
 
     options: Options;
     container: any;
@@ -135,7 +135,7 @@ class TokenAutocomplete {
         }
 
         this.textInput.addEventListener('keydown', function (event) {
-            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER || event.which == me.KEY_TAB || event.keyCode == me.KEY_TAB) {
+            if (event.key == me.KEY_ENTER || event.key == me.KEY_TAB) {
                 event.preventDefault();
 
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
@@ -150,14 +150,14 @@ class TokenAutocomplete {
                 }
 
                 me.clearCurrentInput();
-            } else if (me.textInput.textContent === '' && (event.which == me.KEY_BACKSPACE || event.keyCode == me.KEY_BACKSPACE)) {
+            } else if (me.textInput.textContent === '' && event.key == me.KEY_BACKSPACE) {
                 event.preventDefault();
                 me.select.removeLastToken();
             }
         });
 
         this.textInput.addEventListener('keyup', function (event) {
-            if ((event.which == me.KEY_UP || event.keyCode == me.KEY_UP) && me.autocomplete.suggestions.childNodes.length > 0) {
+            if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
                 if (aboveSuggestion != null) {
@@ -165,7 +165,7 @@ class TokenAutocomplete {
                 }
                 return;
             }
-            if ((event.which == me.KEY_DOWN || event.keyCode == me.KEY_DOWN) && me.autocomplete.suggestions.childNodes.length > 0) {
+            if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let belowSuggestion = highlightedSuggestion?.nextSibling;
                 if (belowSuggestion != null) {
