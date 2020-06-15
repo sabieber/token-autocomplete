@@ -11,11 +11,11 @@ var __assign = (this && this.__assign) || function () {
 };
 var TokenAutocomplete = /** @class */ (function () {
     function TokenAutocomplete(options) {
-        this.KEY_BACKSPACE = 8;
-        this.KEY_ENTER = 13;
-        this.KEY_TAB = 9;
-        this.KEY_UP = 38;
-        this.KEY_DOWN = 40;
+        this.KEY_BACKSPACE = 'Backspace';
+        this.KEY_ENTER = 'Enter';
+        this.KEY_TAB = 'Tab';
+        this.KEY_UP = 'ArrowUp';
+        this.KEY_DOWN = 'ArrowDown';
         this.defaults = {
             name: '',
             selector: '',
@@ -64,7 +64,7 @@ var TokenAutocomplete = /** @class */ (function () {
             });
         }
         this.textInput.addEventListener('keydown', function (event) {
-            if (event.which == me.KEY_ENTER || event.keyCode == me.KEY_ENTER || event.which == me.KEY_TAB || event.keyCode == me.KEY_TAB) {
+            if (event.key == me.KEY_ENTER || event.key == me.KEY_TAB) {
                 event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
@@ -80,13 +80,13 @@ var TokenAutocomplete = /** @class */ (function () {
                 }
                 me.clearCurrentInput();
             }
-            else if (me.textInput.textContent === '' && (event.which == me.KEY_BACKSPACE || event.keyCode == me.KEY_BACKSPACE)) {
+            else if (me.textInput.textContent === '' && event.key == me.KEY_BACKSPACE) {
                 event.preventDefault();
                 me.select.removeLastToken();
             }
         });
         this.textInput.addEventListener('keyup', function (event) {
-            if ((event.which == me.KEY_UP || event.keyCode == me.KEY_UP) && me.autocomplete.suggestions.childNodes.length > 0) {
+            if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
                 if (aboveSuggestion != null) {
@@ -94,7 +94,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 }
                 return;
             }
-            if ((event.which == me.KEY_DOWN || event.keyCode == me.KEY_DOWN) && me.autocomplete.suggestions.childNodes.length > 0) {
+            if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var belowSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.nextSibling;
                 if (belowSuggestion != null) {
@@ -159,7 +159,7 @@ var TokenAutocomplete = /** @class */ (function () {
     /**
      * Clears the currently present tokens and creates new ones from the given input value.
      *
-     * @param {(Array\|string)} value - either the name of a single token or a list of tokens to create
+     * @param {(Array<Token>|string)} value - either the name of a single token or a list of tokens to create
      */
     TokenAutocomplete.prototype.val = function (value) {
         this.select.clear();
@@ -196,7 +196,9 @@ var TokenAutocomplete = /** @class */ (function () {
         /**
          * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
          *
+         * @param {string} tokenValue - the actual value of the token to create
          * @param {string} tokenText - the name of the token to create
+         * @param {string} tokenType - the type of the token to create
          */
         class_1.prototype.addToken = function (tokenValue, tokenText, tokenType) {
             if (tokenValue === null || tokenText === null) {
@@ -225,7 +227,7 @@ var TokenAutocomplete = /** @class */ (function () {
             deleteToken.textContent = '\u00D7';
             token.appendChild(deleteToken);
             var me = this;
-            deleteToken.addEventListener('click', function (event) {
+            deleteToken.addEventListener('click', function () {
                 me.removeToken(token);
             });
             this.container.insertBefore(token, this.parent.textInput);
@@ -234,7 +236,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 text: tokenText,
                 type: tokenType
             };
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", { detail: { tokens: this.currentTokens(), added: addedToken } }));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', { detail: { tokens: this.currentTokens(), added: addedToken } }));
             this.parent.log('added token', token);
         };
         /**
@@ -269,7 +271,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 text: tokenText,
                 type: token.dataset.type
             };
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", { detail: { tokens: this.currentTokens(), removed: addedToken } }));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', { detail: { tokens: this.currentTokens(), removed: addedToken } }));
             this.parent.log('removed token', token.textContent);
         };
         class_1.prototype.removeTokenWithText = function (tokenText) {
@@ -364,7 +366,7 @@ var TokenAutocomplete = /** @class */ (function () {
             /**
              * Adds a suggestion with the given text matching the users input to the dropdown.
              *
-             * @param {string} suggestionText - the text that should be displayed for the added suggestion
+             * @param {string} suggestion - the metadata of the suggestion that should be added
              */
             class_2.prototype.addSuggestion = function (suggestion) {
                 var element = this.renderer(suggestion);

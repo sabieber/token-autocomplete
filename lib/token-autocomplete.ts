@@ -236,7 +236,7 @@ class TokenAutocomplete {
     /**
      * Clears the currently present tokens and creates new ones from the given input value.
      *
-     * @param {(Array\|string)} value - either the name of a single token or a list of tokens to create
+     * @param {(Array<Token>|string)} value - either the name of a single token or a list of tokens to create
      */
     val(value: Array<Token> | Token) {
         this.select.clear();
@@ -280,13 +280,15 @@ class TokenAutocomplete {
         /**
          * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
          *
+         * @param {string} tokenValue - the actual value of the token to create
          * @param {string} tokenText - the name of the token to create
+         * @param {string} tokenType - the type of the token to create
          */
         addToken(tokenValue: string | null, tokenText: string | null, tokenType: string | null) {
             if (tokenValue === null || tokenText === null) {
                 return;
             }
-            var option = document.createElement('option');
+            let option = document.createElement('option');
             option.text = tokenText;
             option.value = tokenValue;
             option.setAttribute('selected', 'true');
@@ -297,7 +299,7 @@ class TokenAutocomplete {
             }
             this.parent.hiddenSelect.add(option);
 
-            var token = document.createElement('span');
+            let token = document.createElement('span');
             token.classList.add('token-autocomplete-token');
             token.setAttribute('data-text', tokenText);
             token.setAttribute('data-value', tokenValue);
@@ -306,13 +308,13 @@ class TokenAutocomplete {
             }
             token.textContent = tokenText;
 
-            var deleteToken = document.createElement('span');
+            let deleteToken = document.createElement('span');
             deleteToken.classList.add('token-autocomplete-token-delete');
             deleteToken.textContent = '\u00D7';
             token.appendChild(deleteToken);
 
             let me = this;
-            deleteToken.addEventListener('click', function (event) {
+            deleteToken.addEventListener('click', function () {
                 me.removeToken(token);
             });
 
@@ -323,7 +325,7 @@ class TokenAutocomplete {
                 text: tokenText,
                 type: tokenType
             };
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: {tokens: this.currentTokens(), added: addedToken}}));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', {detail: {tokens: this.currentTokens(), added: addedToken}}));
 
             this.parent.log('added token', token);
         }
@@ -364,7 +366,7 @@ class TokenAutocomplete {
                 text: tokenText,
                 type: token.dataset.type
             }
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: {tokens: this.currentTokens(), removed: addedToken}}));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', {detail: {tokens: this.currentTokens(), removed: addedToken}}));
 
             this.parent.log('removed token', token.textContent);
         }
@@ -477,7 +479,7 @@ class TokenAutocomplete {
         /**
          * Adds a suggestion with the given text matching the users input to the dropdown.
          *
-         * @param {string} suggestionText - the text that should be displayed for the added suggestion
+         * @param {string} suggestion - the metadata of the suggestion that should be added
          */
         addSuggestion(suggestion: Suggestion) {
             let element = this.renderer(suggestion);
@@ -516,11 +518,11 @@ class TokenAutocomplete {
         }
 
         static defaultRenderer: SuggestionRenderer = function (suggestion: Suggestion): HTMLElement {
-            var option = document.createElement('li');
+            let option = document.createElement('li');
             option.textContent = suggestion.text;
 
             if (suggestion.description) {
-                var description = document.createElement('small');
+                let description = document.createElement('small');
                 description.textContent = suggestion.description;
                 description.classList.add('token-autocomplete-suggestion-description');
                 option.appendChild(description);
