@@ -59,7 +59,7 @@ var TokenAutocomplete = /** @class */ (function () {
         if (Array.isArray(this.options.initialTokens)) {
             this.options.initialTokens.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text);
+                    me.select.addToken(token.value, token.text, null);
                 }
             });
         }
@@ -72,11 +72,11 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.select.removeTokenWithText(highlightedSuggestion.textContent);
                     }
                     else {
-                        me.select.addToken(highlightedSuggestion.getAttribute('data-value'), highlightedSuggestion.textContent);
+                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.textContent, highlightedSuggestion.dataset.type);
                     }
                 }
                 else {
-                    me.select.addToken(me.textInput.textContent, me.textInput.textContent);
+                    me.select.addToken(me.textInput.textContent, me.textInput.textContent, null);
                 }
                 me.clearCurrentInput();
             }
@@ -121,7 +121,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.autocomplete.highlightSuggestionAtPosition(0);
                     }
                     else if (me.options.noMatchesText) {
-                        me.autocomplete.addSuggestion({ value: '_no_match_', text: me.options.noMatchesText, description: null });
+                        me.autocomplete.addSuggestion({ id: null, value: '_no_match_', text: me.options.noMatchesText, type: '_no_match_', description: null });
                     }
                 }
                 else if (me.options.suggestionsUri.length > 0) {
@@ -145,7 +145,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 if (option.hasAttribute('selected')) {
                     initialTokens.push({ value: option.value, text: option.text });
                 }
-                initialSuggestions.push({ value: option.value, text: option.text, description: null });
+                initialSuggestions.push({ id: null, value: option.value, text: option.text, type: null, description: null });
             }
             me.container.removeChild(option);
         });
@@ -167,12 +167,12 @@ var TokenAutocomplete = /** @class */ (function () {
             var me_1 = this;
             value.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me_1.select.addToken(token.value, token.text);
+                    me_1.select.addToken(token.value, token.text, null);
                 }
             });
         }
         else {
-            this.select.addToken(value.value, value.text);
+            this.select.addToken(value.value, value.text, null);
         }
     };
     TokenAutocomplete.prototype.clearCurrentInput = function () {
@@ -198,7 +198,7 @@ var TokenAutocomplete = /** @class */ (function () {
          *
          * @param {string} tokenText - the name of the token to create
          */
-        class_1.prototype.addToken = function (tokenValue, tokenText) {
+        class_1.prototype.addToken = function (tokenValue, tokenText, tokenType) {
             if (tokenValue === null || tokenText === null) {
                 return;
             }
@@ -208,11 +208,17 @@ var TokenAutocomplete = /** @class */ (function () {
             option.setAttribute('selected', 'true');
             option.setAttribute('data-text', tokenText);
             option.setAttribute('data-value', tokenValue);
+            if (tokenType != null) {
+                option.setAttribute('data-type', tokenType);
+            }
             this.parent.hiddenSelect.add(option);
             var token = document.createElement('span');
             token.classList.add('token-autocomplete-token');
             token.setAttribute('data-text', tokenText);
-            option.setAttribute('data-value', tokenValue);
+            token.setAttribute('data-value', tokenValue);
+            if (tokenType != null) {
+                token.setAttribute('data-type', tokenType);
+            }
             token.textContent = tokenText;
             var deleteToken = document.createElement('span');
             deleteToken.classList.add('token-autocomplete-token-delete');
@@ -335,7 +341,7 @@ var TokenAutocomplete = /** @class */ (function () {
                             me.highlightSuggestionAtPosition(0);
                         }
                         else if (me.options.noMatchesText) {
-                            me.addSuggestion({ value: '_no_match_', text: me.options.noMatchesText, description: null });
+                            me.addSuggestion({ id: null, value: '_no_match_', text: me.options.noMatchesText, type: '_no_match_', description: null });
                         }
                     }
                 };
@@ -352,7 +358,11 @@ var TokenAutocomplete = /** @class */ (function () {
              */
             class_2.prototype.addSuggestion = function (suggestion) {
                 var element = this.renderer(suggestion);
-                element.setAttribute('data-value', suggestion.value);
+                var value = suggestion.id || suggestion.value;
+                element.setAttribute('data-value', value);
+                if (suggestion.type != null) {
+                    element.setAttribute('data-type', suggestion.type);
+                }
                 var me = this;
                 element.addEventListener('click', function (_event) {
                     if (suggestion.text == me.options.noMatchesText) {
@@ -362,7 +372,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.parent.select.removeTokenWithText(suggestion.text);
                     }
                     else {
-                        me.parent.select.addToken(suggestion.value, suggestion.text);
+                        me.parent.select.addToken(value, suggestion.text, suggestion.type);
                     }
                     me.clearSuggestions();
                     me.hideSuggestions();
