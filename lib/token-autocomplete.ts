@@ -1,6 +1,7 @@
 interface Token {
     value: string,
-    text: string
+    text: string,
+    type: string | null
 }
 
 interface Suggestion {
@@ -217,7 +218,7 @@ class TokenAutocomplete {
         options.forEach(function (option) {
             if (option.text != null) {
                 if (option.hasAttribute('selected')) {
-                    initialTokens.push({value: option.value, text: option.text});
+                    initialTokens.push({value: option.value, text: option.text, type: null});
                 }
                 initialSuggestions.push({id: null, value: option.value, text: option.text, type: null, description: null});
             }
@@ -317,7 +318,12 @@ class TokenAutocomplete {
 
             this.container.insertBefore(token, this.parent.textInput);
 
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: this.currentTokens()}));
+            let addedToken = {
+                value: tokenValue,
+                text: tokenText,
+                type: tokenType
+            };
+            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: {tokens: this.currentTokens(), added: addedToken}}));
 
             this.parent.log('added token', token);
         }
@@ -326,7 +332,7 @@ class TokenAutocomplete {
          * Completely clears the currently present tokens from the field.
          */
         clear() {
-            let tokens: NodeListOf<Element> = this.container.querySelectorAll('.token-autocomplete-token');
+            let tokens: NodeListOf<HTMLElement> = this.container.querySelectorAll('.token-autocomplete-token');
 
             let me = this;
             tokens.forEach(function (token) {me.removeToken(token);});
@@ -346,14 +352,19 @@ class TokenAutocomplete {
          *
          * @param {Element} token - the token to remove
          */
-        removeToken(token: Element) {
+        removeToken(token: HTMLElement) {
             this.container.removeChild(token);
 
             let tokenText = token.getAttribute('data-text');
             let hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
             hiddenOption?.parentElement?.removeChild(hiddenOption);
 
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: this.currentTokens()}));
+            let addedToken = {
+                value: token.dataset.value,
+                text: tokenText,
+                type: token.dataset.type
+            }
+            this.container.dispatchEvent(new CustomEvent("tokens-changed", {detail: {tokens: this.currentTokens(), removed: addedToken}}));
 
             this.parent.log('removed token', token.textContent);
         }

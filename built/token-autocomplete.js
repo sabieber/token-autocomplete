@@ -143,7 +143,7 @@ var TokenAutocomplete = /** @class */ (function () {
         options.forEach(function (option) {
             if (option.text != null) {
                 if (option.hasAttribute('selected')) {
-                    initialTokens.push({ value: option.value, text: option.text });
+                    initialTokens.push({ value: option.value, text: option.text, type: null });
                 }
                 initialSuggestions.push({ id: null, value: option.value, text: option.text, type: null, description: null });
             }
@@ -229,7 +229,12 @@ var TokenAutocomplete = /** @class */ (function () {
                 me.removeToken(token);
             });
             this.container.insertBefore(token, this.parent.textInput);
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", { detail: this.currentTokens() }));
+            var addedToken = {
+                value: tokenValue,
+                text: tokenText,
+                type: tokenType
+            };
+            this.container.dispatchEvent(new CustomEvent("tokens-changed", { detail: { tokens: this.currentTokens(), added: addedToken } }));
             this.parent.log('added token', token);
         };
         /**
@@ -259,7 +264,12 @@ var TokenAutocomplete = /** @class */ (function () {
             var tokenText = token.getAttribute('data-text');
             var hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
             (_a = hiddenOption === null || hiddenOption === void 0 ? void 0 : hiddenOption.parentElement) === null || _a === void 0 ? void 0 : _a.removeChild(hiddenOption);
-            this.container.dispatchEvent(new CustomEvent("tokens-changed", { detail: this.currentTokens() }));
+            var addedToken = {
+                value: token.dataset.value,
+                text: tokenText,
+                type: token.dataset.type
+            };
+            this.container.dispatchEvent(new CustomEvent("tokens-changed", { detail: { tokens: this.currentTokens(), removed: addedToken } }));
             this.parent.log('removed token', token.textContent);
         };
         class_1.prototype.removeTokenWithText = function (tokenText) {
