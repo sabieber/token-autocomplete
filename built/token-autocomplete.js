@@ -58,13 +58,6 @@ var TokenAutocomplete = /** @class */ (function () {
         this.autocomplete = new TokenAutocomplete.Autocomplete(this);
         this.debug(false);
         var me = this;
-        if (Array.isArray(this.options.initialTokens)) {
-            this.options.initialTokens.forEach(function (token) {
-                if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text, null);
-                }
-            });
-        }
         this.textInput.addEventListener('keydown', function (event) {
             if (event.key == me.KEY_ENTER || event.key == me.KEY_TAB) {
                 event.preventDefault();
@@ -168,6 +161,13 @@ var TokenAutocomplete = /** @class */ (function () {
         }
         if (initialSuggestions.length > 0) {
             this.options.initialSuggestions = initialSuggestions;
+        }
+        if (Array.isArray(this.options.initialTokens)) {
+            this.options.initialTokens.forEach(function (token) {
+                if (typeof token === 'object') {
+                    me.select.addToken(token.value, token.text, null);
+                }
+            });
         }
     };
     /**
