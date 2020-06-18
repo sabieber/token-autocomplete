@@ -146,7 +146,7 @@ class TokenAutocomplete {
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
                         me.select.removeTokenWithText(highlightedSuggestion.textContent);
                     } else {
-                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.textContent, highlightedSuggestion.dataset.type);
+                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
                     }
                 } else {
                     me.select.addToken(me.getCurrentInput(), me.getCurrentInput(), null);
@@ -536,6 +536,7 @@ class TokenAutocomplete {
             let value = suggestion.id || suggestion.value;
 
             element.setAttribute('data-value', value);
+            element.dataset.text = suggestion.text;
             if (suggestion.type != null) {
                 element.setAttribute('data-type', suggestion.type);
             }

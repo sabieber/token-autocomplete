@@ -67,7 +67,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.select.removeTokenWithText(highlightedSuggestion.textContent);
                     }
                     else {
-                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.textContent, highlightedSuggestion.dataset.type);
+                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
                     }
                 }
                 else {
@@ -411,6 +411,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 var element = this.renderer(suggestion);
                 var value = suggestion.id || suggestion.value;
                 element.setAttribute('data-value', value);
+                element.dataset.text = suggestion.text;
                 if (suggestion.type != null) {
                     element.setAttribute('data-type', suggestion.type);
                 }
