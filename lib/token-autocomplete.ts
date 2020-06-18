@@ -146,11 +146,11 @@ class TokenAutocomplete {
                         me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.textContent, highlightedSuggestion.dataset.type);
                     }
                 } else {
-                    me.select.addToken(me.textInput.textContent, me.textInput.textContent, null);
+                    me.select.addToken(me.getCurrentInput(), me.getCurrentInput(), null);
                 }
 
                 me.clearCurrentInput();
-            } else if (me.textInput.textContent === '' && event.key == me.KEY_BACKSPACE) {
+            } else if (me.getCurrentInput() === '' && event.key == me.KEY_BACKSPACE) {
                 event.preventDefault();
                 me.select.removeLastToken();
             }
@@ -177,7 +177,7 @@ class TokenAutocomplete {
             me.autocomplete.hideSuggestions();
             me.autocomplete.clearSuggestions();
 
-            let value = me.textInput.textContent || '';
+            let value = me.getCurrentInput();
             if (value.length >= me.options.minCharactersForSuggestion) {
                 if (Array.isArray(me.options.initialSuggestions)) {
                     me.options.initialSuggestions.forEach(function (suggestion) {
@@ -251,6 +251,13 @@ class TokenAutocomplete {
         } else {
             this.select.addToken(value.value, value.text, null);
         }
+    }
+
+    /**
+     * Returns the current text the user has input which is not converted into a token.
+     */
+    getCurrentInput() {
+        return this.textInput.textContent || '';
     }
 
     clearCurrentInput() {
