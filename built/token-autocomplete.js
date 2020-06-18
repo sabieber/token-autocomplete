@@ -24,7 +24,9 @@ var TokenAutocomplete = /** @class */ (function () {
             initialTokens: null,
             initialSuggestions: null,
             suggestionsUri: '',
-            suggestionsUriBuilder: function (query) { return this.suggestionsUri + '?query=' + query; },
+            suggestionsUriBuilder: function (query) {
+                return this.suggestionsUri + '?query=' + query;
+            },
             suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
             minCharactersForSuggestion: 1
         };
@@ -121,7 +123,13 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.autocomplete.highlightSuggestionAtPosition(0);
                     }
                     else if (me.options.noMatchesText) {
-                        me.autocomplete.addSuggestion({ id: null, value: '_no_match_', text: me.options.noMatchesText, type: '_no_match_', description: null });
+                        me.autocomplete.addSuggestion({
+                            id: null,
+                            value: '_no_match_',
+                            text: me.options.noMatchesText,
+                            type: '_no_match_',
+                            description: null
+                        });
                     }
                 }
                 else if (me.options.suggestionsUri.length > 0) {
@@ -145,7 +153,13 @@ var TokenAutocomplete = /** @class */ (function () {
                 if (option.hasAttribute('selected')) {
                     initialTokens.push({ value: option.value, text: option.text, type: null });
                 }
-                initialSuggestions.push({ id: null, value: option.value, text: option.text, type: null, description: null });
+                initialSuggestions.push({
+                    id: null,
+                    value: option.value,
+                    text: option.text,
+                    type: null,
+                    description: null
+                });
             }
             me.container.removeChild(option);
         });
@@ -189,7 +203,8 @@ var TokenAutocomplete = /** @class */ (function () {
             this.log = console.log.bind(window.console);
         }
         else {
-            this.log = function () { };
+            this.log = function () {
+            };
         }
     };
     var _a;
@@ -242,7 +257,12 @@ var TokenAutocomplete = /** @class */ (function () {
                 text: tokenText,
                 type: tokenType
             };
-            this.container.dispatchEvent(new CustomEvent('tokens-changed', { detail: { tokens: this.currentTokens(), added: addedToken } }));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                detail: {
+                    tokens: this.currentTokens(),
+                    added: addedToken
+                }
+            }));
             this.parent.log('added token', token);
         };
         /**
@@ -251,7 +271,9 @@ var TokenAutocomplete = /** @class */ (function () {
         class_1.prototype.clear = function () {
             var tokens = this.container.querySelectorAll('.token-autocomplete-token');
             var me = this;
-            tokens.forEach(function (token) { me.removeToken(token); });
+            tokens.forEach(function (token) {
+                me.removeToken(token);
+            });
         };
         /**
          * Removes the last token in the list of currently present token. This is the last added token next to the input field.
@@ -277,7 +299,12 @@ var TokenAutocomplete = /** @class */ (function () {
                 text: tokenText,
                 type: token.dataset.type
             };
-            this.container.dispatchEvent(new CustomEvent('tokens-changed', { detail: { tokens: this.currentTokens(), removed: addedToken } }));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                detail: {
+                    tokens: this.currentTokens(),
+                    removed: addedToken
+                }
+            }));
             this.parent.log('removed token', token.textContent);
         };
         class_1.prototype.removeTokenWithText = function (tokenText) {
@@ -359,7 +386,13 @@ var TokenAutocomplete = /** @class */ (function () {
                             me.highlightSuggestionAtPosition(0);
                         }
                         else if (me.options.noMatchesText) {
-                            me.addSuggestion({ id: null, value: '_no_match_', text: me.options.noMatchesText, type: '_no_match_', description: null });
+                            me.addSuggestion({
+                                id: null,
+                                value: '_no_match_',
+                                text: me.options.noMatchesText,
+                                type: '_no_match_',
+                                description: null
+                            });
                         }
                     }
                 };
