@@ -64,7 +64,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
-                        me.select.removeTokenWithText(highlightedSuggestion.textContent);
+                        me.select.removeTokenWithText(highlightedSuggestion.dataset.text);
                     }
                     else {
                         me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
