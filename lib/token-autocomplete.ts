@@ -34,18 +34,27 @@ interface SingleSelect extends SelectMode {
 
 interface MultiSelect extends SelectMode {
     addToken(suggestionValue: string | null, suggestionText: string | null, suggestionType: string | null): void;
+
     removeToken(token: HTMLSpanElement): void;
-    removeLastToken() : void;
+
+    removeLastToken(): void;
+
     removeTokenWithText(textContent: any): void;
 }
 
 interface Autocomplete {
     suggestions: any;
+
     requestSuggestions(value: string): void;
+
     highlightSuggestionAtPosition(arg0: number): void;
+
     addSuggestion(suggestion: Suggestion): void;
+
     clearSuggestions(): void;
+
     hideSuggestions(): void;
+
     highlightSuggestion(arg0: Element): void;
 }
 
@@ -81,7 +90,9 @@ class TokenAutocomplete {
         initialTokens: null,
         initialSuggestions: null,
         suggestionsUri: '',
-        suggestionsUriBuilder: function (query) { return this.suggestionsUri + '?query=' + query },
+        suggestionsUriBuilder: function (query) {
+            return this.suggestionsUri + '?query=' + query
+        },
         suggestionRenderer: TokenAutocomplete.Autocomplete.defaultRenderer,
         minCharactersForSuggestion: 1
     };
@@ -112,7 +123,7 @@ class TokenAutocomplete {
         this.textInput.id = this.container.id + '-input';
         this.textInput.classList.add('token-autocomplete-input');
         if (this.options.placeholderText != null) {
-            this.textInput.setAttribute('data-placeholder', this.options.placeholderText);
+            this.textInput.dataset.placeholder = this.options.placeholderText;
         }
         this.textInput.contentEditable = 'true';
 
@@ -126,14 +137,6 @@ class TokenAutocomplete {
 
         let me = this;
 
-        if (Array.isArray(this.options.initialTokens)) {
-            this.options.initialTokens.forEach(function (token) {
-                if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text, null);
-                }
-            });
-        }
-
         this.textInput.addEventListener('keydown', function (event) {
             if (event.key == me.KEY_ENTER || event.key == me.KEY_TAB) {
                 event.preventDefault();
@@ -141,16 +144,16 @@ class TokenAutocomplete {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
-                        me.select.removeTokenWithText(highlightedSuggestion.textContent);
+                        me.select.removeTokenWithText(highlightedSuggestion.dataset.text);
                     } else {
-                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.textContent, highlightedSuggestion.dataset.type);
+                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
                     }
                 } else {
-                    me.select.addToken(me.textInput.textContent, me.textInput.textContent, null);
+                    me.select.addToken(me.getCurrentInput(), me.getCurrentInput(), null);
                 }
 
                 me.clearCurrentInput();
-            } else if (me.textInput.textContent === '' && event.key == me.KEY_BACKSPACE) {
+            } else if (me.getCurrentInput() === '' && event.key == me.KEY_BACKSPACE) {
                 event.preventDefault();
                 me.select.removeLastToken();
             }
@@ -177,7 +180,7 @@ class TokenAutocomplete {
             me.autocomplete.hideSuggestions();
             me.autocomplete.clearSuggestions();
 
-            let value = me.textInput.textContent || '';
+            let value = me.getCurrentInput();
             if (value.length >= me.options.minCharactersForSuggestion) {
                 if (Array.isArray(me.options.initialSuggestions)) {
                     me.options.initialSuggestions.forEach(function (suggestion) {
@@ -193,7 +196,13 @@ class TokenAutocomplete {
                     if (me.autocomplete.suggestions.childNodes.length > 0) {
                         me.autocomplete.highlightSuggestionAtPosition(0);
                     } else if (me.options.noMatchesText) {
-                        me.autocomplete.addSuggestion({id: null, value: '_no_match_', text: me.options.noMatchesText, type: '_no_match_', description: null});
+                        me.autocomplete.addSuggestion({
+                            id: null,
+                            value: '_no_match_',
+                            text: me.options.noMatchesText,
+                            type: '_no_match_',
+                            description: null
+                        });
                     }
                 } else if (me.options.suggestionsUri.length > 0) {
                     me.autocomplete.requestSuggestions(value);
@@ -220,7 +229,13 @@ class TokenAutocomplete {
                 if (option.hasAttribute('selected')) {
                     initialTokens.push({value: option.value, text: option.text, type: null});
                 }
-                initialSuggestions.push({id: null, value: option.value, text: option.text, type: null, description: null});
+                initialSuggestions.push({
+                    id: null,
+                    value: option.value,
+                    text: option.text,
+                    type: null,
+                    description: null
+                });
             }
             me.container.removeChild(option);
         });
@@ -230,6 +245,14 @@ class TokenAutocomplete {
         }
         if (initialSuggestions.length > 0) {
             this.options.initialSuggestions = initialSuggestions;
+        }
+
+        if (Array.isArray(this.options.initialTokens)) {
+            this.options.initialTokens.forEach(function (token) {
+                if (typeof token === 'object') {
+                    me.select.addToken(token.value, token.text, null);
+                }
+            });
         }
     }
 
@@ -253,6 +276,13 @@ class TokenAutocomplete {
         }
     }
 
+    /**
+     * Returns the current text the user has input which is not converted into a token.
+     */
+    getCurrentInput() {
+        return this.textInput.textContent || '';
+    }
+
     clearCurrentInput() {
         this.textInput.textContent = '';
     }
@@ -261,7 +291,8 @@ class TokenAutocomplete {
         if (state) {
             this.log = console.log.bind(window.console);
         } else {
-            this.log = function () {}
+            this.log = function () {
+            }
         }
     }
 
@@ -271,7 +302,7 @@ class TokenAutocomplete {
         container: any;
         options: Options;
 
-        constructor(parent:TokenAutocomplete) {
+        constructor(parent: TokenAutocomplete) {
             this.parent = parent;
             this.container = parent.container;
             this.options = parent.options;
@@ -292,19 +323,19 @@ class TokenAutocomplete {
             option.text = tokenText;
             option.value = tokenValue;
             option.setAttribute('selected', 'true');
-            option.setAttribute('data-text', tokenText);
-            option.setAttribute('data-value', tokenValue);
+            option.dataset.text = tokenText;
+            option.dataset.value = tokenValue;
             if (tokenType != null) {
-                option.setAttribute('data-type', tokenType);
+                option.dataset.type = tokenType;
             }
             this.parent.hiddenSelect.add(option);
 
             let token = document.createElement('span');
             token.classList.add('token-autocomplete-token');
-            token.setAttribute('data-text', tokenText);
-            token.setAttribute('data-value', tokenValue);
+            token.dataset.text = tokenText;
+            token.dataset.value = tokenValue;
             if (tokenType != null) {
-                token.setAttribute('data-type', tokenType);
+                token.dataset.type = tokenType;
             }
             token.textContent = tokenText;
 
@@ -325,7 +356,12 @@ class TokenAutocomplete {
                 text: tokenText,
                 type: tokenType
             };
-            this.container.dispatchEvent(new CustomEvent('tokens-changed', {detail: {tokens: this.currentTokens(), added: addedToken}}));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                detail: {
+                    tokens: this.currentTokens(),
+                    added: addedToken
+                }
+            }));
 
             this.parent.log('added token', token);
         }
@@ -337,7 +373,9 @@ class TokenAutocomplete {
             let tokens: NodeListOf<HTMLElement> = this.container.querySelectorAll('.token-autocomplete-token');
 
             let me = this;
-            tokens.forEach(function (token) {me.removeToken(token);});
+            tokens.forEach(function (token) {
+                me.removeToken(token);
+            });
         }
 
         /**
@@ -357,7 +395,7 @@ class TokenAutocomplete {
         removeToken(token: HTMLElement) {
             this.container.removeChild(token);
 
-            let tokenText = token.getAttribute('data-text');
+            let tokenText = token.dataset.text;
             let hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
             hiddenOption?.parentElement?.removeChild(hiddenOption);
 
@@ -366,7 +404,12 @@ class TokenAutocomplete {
                 text: tokenText,
                 type: token.dataset.type
             }
-            this.container.dispatchEvent(new CustomEvent('tokens-changed', {detail: {tokens: this.currentTokens(), removed: addedToken}}));
+            this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                detail: {
+                    tokens: this.currentTokens(),
+                    removed: addedToken
+                }
+            }));
 
             this.parent.log('removed token', token.textContent);
         }
@@ -400,7 +443,7 @@ class TokenAutocomplete {
         suggestions: HTMLUListElement;
         renderer: SuggestionRenderer;
 
-        constructor(parent:TokenAutocomplete) {
+        constructor(parent: TokenAutocomplete) {
             this.parent = parent;
             this.container = parent.container;
             this.options = parent.options;
@@ -457,7 +500,7 @@ class TokenAutocomplete {
         requestSuggestions(query: string) {
             let me = this;
             let request = new XMLHttpRequest();
-            request.onload = function() {
+            request.onload = function () {
                 if (Array.isArray(request.response.completions)) {
                     request.response.completions.forEach(function (suggestion: Suggestion) {
                         me.addSuggestion(suggestion);
@@ -465,7 +508,13 @@ class TokenAutocomplete {
                     if (me.suggestions.childNodes.length > 0) {
                         me.highlightSuggestionAtPosition(0);
                     } else if (me.options.noMatchesText) {
-                        me.addSuggestion({id: null, value: '_no_match_', text: me.options.noMatchesText, type: '_no_match_', description: null});
+                        me.addSuggestion({
+                            id: null,
+                            value: '_no_match_',
+                            text: me.options.noMatchesText,
+                            type: '_no_match_',
+                            description: null
+                        });
                     }
                 }
             };
@@ -486,9 +535,10 @@ class TokenAutocomplete {
 
             let value = suggestion.id || suggestion.value;
 
-            element.setAttribute('data-value', value);
+            element.dataset.value = value;
+            element.dataset.text = suggestion.text;
             if (suggestion.type != null) {
-                element.setAttribute('data-type', suggestion.type);
+                element.dataset.type = suggestion.type;
             }
 
             let me = this;
