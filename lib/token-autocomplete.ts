@@ -123,7 +123,7 @@ class TokenAutocomplete {
         this.textInput.id = this.container.id + '-input';
         this.textInput.classList.add('token-autocomplete-input');
         if (this.options.placeholderText != null) {
-            this.textInput.setAttribute('data-placeholder', this.options.placeholderText);
+            this.textInput.dataset.placeholder = this.options.placeholderText;
         }
         this.textInput.contentEditable = 'true';
 
@@ -323,19 +323,19 @@ class TokenAutocomplete {
             option.text = tokenText;
             option.value = tokenValue;
             option.setAttribute('selected', 'true');
-            option.setAttribute('data-text', tokenText);
-            option.setAttribute('data-value', tokenValue);
+            option.dataset.text = tokenText;
+            option.dataset.value = tokenValue;
             if (tokenType != null) {
-                option.setAttribute('data-type', tokenType);
+                option.dataset.type = tokenType;
             }
             this.parent.hiddenSelect.add(option);
 
             let token = document.createElement('span');
             token.classList.add('token-autocomplete-token');
-            token.setAttribute('data-text', tokenText);
-            token.setAttribute('data-value', tokenValue);
+            token.dataset.text = tokenText;
+            token.dataset.value = tokenValue;
             if (tokenType != null) {
-                token.setAttribute('data-type', tokenType);
+                token.dataset.type = tokenType;
             }
             token.textContent = tokenText;
 
@@ -395,7 +395,7 @@ class TokenAutocomplete {
         removeToken(token: HTMLElement) {
             this.container.removeChild(token);
 
-            let tokenText = token.getAttribute('data-text');
+            let tokenText = token.dataset.text;
             let hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
             hiddenOption?.parentElement?.removeChild(hiddenOption);
 
@@ -535,10 +535,10 @@ class TokenAutocomplete {
 
             let value = suggestion.id || suggestion.value;
 
-            element.setAttribute('data-value', value);
+            element.dataset.value = value;
             element.dataset.text = suggestion.text;
             if (suggestion.type != null) {
-                element.setAttribute('data-type', suggestion.type);
+                element.dataset.type = suggestion.type;
             }
 
             let me = this;

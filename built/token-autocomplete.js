@@ -49,7 +49,7 @@ var TokenAutocomplete = /** @class */ (function () {
         this.textInput.id = this.container.id + '-input';
         this.textInput.classList.add('token-autocomplete-input');
         if (this.options.placeholderText != null) {
-            this.textInput.setAttribute('data-placeholder', this.options.placeholderText);
+            this.textInput.dataset.placeholder = this.options.placeholderText;
         }
         this.textInput.contentEditable = 'true';
         this.container.appendChild(this.textInput);
@@ -229,18 +229,18 @@ var TokenAutocomplete = /** @class */ (function () {
             option.text = tokenText;
             option.value = tokenValue;
             option.setAttribute('selected', 'true');
-            option.setAttribute('data-text', tokenText);
-            option.setAttribute('data-value', tokenValue);
+            option.dataset.text = tokenText;
+            option.dataset.value = tokenValue;
             if (tokenType != null) {
-                option.setAttribute('data-type', tokenType);
+                option.dataset.type = tokenType;
             }
             this.parent.hiddenSelect.add(option);
             var token = document.createElement('span');
             token.classList.add('token-autocomplete-token');
-            token.setAttribute('data-text', tokenText);
-            token.setAttribute('data-value', tokenValue);
+            token.dataset.text = tokenText;
+            token.dataset.value = tokenValue;
             if (tokenType != null) {
-                token.setAttribute('data-type', tokenType);
+                token.dataset.type = tokenType;
             }
             token.textContent = tokenText;
             var deleteToken = document.createElement('span');
@@ -291,7 +291,7 @@ var TokenAutocomplete = /** @class */ (function () {
         class_1.prototype.removeToken = function (token) {
             var _a;
             this.container.removeChild(token);
-            var tokenText = token.getAttribute('data-text');
+            var tokenText = token.dataset.text;
             var hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
             (_a = hiddenOption === null || hiddenOption === void 0 ? void 0 : hiddenOption.parentElement) === null || _a === void 0 ? void 0 : _a.removeChild(hiddenOption);
             var addedToken = {
@@ -410,10 +410,10 @@ var TokenAutocomplete = /** @class */ (function () {
             class_2.prototype.addSuggestion = function (suggestion) {
                 var element = this.renderer(suggestion);
                 var value = suggestion.id || suggestion.value;
-                element.setAttribute('data-value', value);
+                element.dataset.value = value;
                 element.dataset.text = suggestion.text;
                 if (suggestion.type != null) {
-                    element.setAttribute('data-type', suggestion.type);
+                    element.dataset.type = suggestion.type;
                 }
                 var me = this;
                 element.addEventListener('click', function (_event) {
