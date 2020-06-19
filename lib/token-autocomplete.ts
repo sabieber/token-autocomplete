@@ -26,6 +26,8 @@ interface Options {
 }
 
 interface SelectMode {
+    handleInputAsValue(input: string): void;
+
     clear(): void;
 }
 
@@ -148,11 +150,10 @@ class TokenAutocomplete {
                     } else {
                         me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
                     }
+                    me.clearCurrentInput();
                 } else {
-                    me.select.addToken(me.getCurrentInput(), me.getCurrentInput(), null);
+                    me.select.handleInputAsValue(me.getCurrentInput());
                 }
-
-                me.clearCurrentInput();
             } else if (me.getCurrentInput() === '' && event.key == me.KEY_BACKSPACE) {
                 event.preventDefault();
                 me.select.removeLastToken();
@@ -309,7 +310,17 @@ class TokenAutocomplete {
         }
 
         /**
-         * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
+         * Adds the current user input as a net token and resets the input area so new text can be entered.
+         *
+         * @param {string} input - the actual input the user entered
+         */
+        handleInputAsValue(input: string): void {
+            this.addToken(input, input, null);
+            this.parent.clearCurrentInput();
+        }
+
+        /**
+         * Adds a token with the specified name to the list of currently present tokens displayed to the user and the hidden select.
          *
          * @param {string} tokenValue - the actual value of the token to create
          * @param {string} tokenText - the name of the token to create
