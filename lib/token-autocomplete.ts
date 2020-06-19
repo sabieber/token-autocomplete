@@ -446,6 +446,22 @@ class TokenAutocomplete {
         }
     }
 
+    static SearchMultiSelect = class extends TokenAutocomplete.MultiSelect {
+        /**
+         * Instead of adding the custom user input as a token and handling it as a filter we let it remain in the input
+         * area and instead send an event so the user search request can be handled / executed.
+         *
+         * @param {string} input - the actual input the user entered
+         */
+        handleInputAsValue(input: string) {
+            this.container.dispatchEvent(new CustomEvent('query-changed', {
+                detail: {
+                    query: input
+                }
+            }));
+        }
+    }
+
     static Autocomplete = class implements Autocomplete {
 
         parent: TokenAutocomplete;
