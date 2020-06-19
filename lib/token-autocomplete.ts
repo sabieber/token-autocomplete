@@ -19,10 +19,15 @@ interface Options {
     placeholderText: string | null,
     initialTokens: Array<Token> | null,
     initialSuggestions: Array<Suggestion> | null,
+    selectMode: SelectModes,
     suggestionsUri: string,
     suggestionsUriBuilder: SuggestionUriBuilder,
     suggestionRenderer: SuggestionRenderer,
     minCharactersForSuggestion: number
+}
+
+enum SelectModes {
+    SINGLE, MULTI, SEARCH
 }
 
 interface SelectMode {
@@ -92,6 +97,7 @@ class TokenAutocomplete {
         initialTokens: null,
         initialSuggestions: null,
         suggestionsUri: '',
+        selectMode: SelectModes.MULTI,
         suggestionsUriBuilder: function (query) {
             return this.suggestionsUri + '?query=' + query
         },
@@ -132,7 +138,11 @@ class TokenAutocomplete {
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
 
-        this.select = new TokenAutocomplete.MultiSelect(this);
+        if (this.options.selectMode == SelectModes.MULTI) {
+            this.select = new TokenAutocomplete.MultiSelect(this);
+        } else if (this.options.selectMode == SelectModes.SEARCH) {
+            this.select = new TokenAutocomplete.SearchMultiSelect(this);
+        }
         this.autocomplete = new TokenAutocomplete.Autocomplete(this);
 
         this.debug(false);

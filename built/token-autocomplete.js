@@ -22,6 +22,12 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var SelectModes;
+(function (SelectModes) {
+    SelectModes[SelectModes["SINGLE"] = 0] = "SINGLE";
+    SelectModes[SelectModes["MULTI"] = 1] = "MULTI";
+    SelectModes[SelectModes["SEARCH"] = 2] = "SEARCH";
+})(SelectModes || (SelectModes = {}));
 var TokenAutocomplete = /** @class */ (function () {
     function TokenAutocomplete(options) {
         this.KEY_BACKSPACE = 'Backspace';
@@ -37,6 +43,7 @@ var TokenAutocomplete = /** @class */ (function () {
             initialTokens: null,
             initialSuggestions: null,
             suggestionsUri: '',
+            selectMode: SelectModes.MULTI,
             suggestionsUriBuilder: function (query) {
                 return this.suggestionsUri + '?query=' + query;
             },
@@ -67,7 +74,12 @@ var TokenAutocomplete = /** @class */ (function () {
         this.textInput.contentEditable = 'true';
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
-        this.select = new TokenAutocomplete.MultiSelect(this);
+        if (this.options.selectMode == SelectModes.MULTI) {
+            this.select = new TokenAutocomplete.MultiSelect(this);
+        }
+        else if (this.options.selectMode == SelectModes.SEARCH) {
+            this.select = new TokenAutocomplete.SearchMultiSelect(this);
+        }
         this.autocomplete = new TokenAutocomplete.Autocomplete(this);
         this.debug(false);
         var me = this;
