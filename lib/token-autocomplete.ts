@@ -80,6 +80,7 @@ class TokenAutocomplete {
     KEY_TAB = 'Tab';
     KEY_UP = 'ArrowUp';
     KEY_DOWN = 'ArrowDown';
+    KEY_ESC = 'Escape';
 
     options: Options;
     container: any;
@@ -171,6 +172,10 @@ class TokenAutocomplete {
         });
 
         this.textInput.addEventListener('keyup', function (event) {
+            if (event.key == me.KEY_ESC) {
+                me.autocomplete.hideSuggestions();
+                return;
+            }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
@@ -498,6 +503,11 @@ class TokenAutocomplete {
          */
         hideSuggestions() {
             this.suggestions.style.display = '';
+
+            let suggestions = this.suggestions.querySelectorAll('li');
+            suggestions.forEach(function (suggestion) {
+                suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+            })
         }
 
         /**

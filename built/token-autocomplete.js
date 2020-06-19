@@ -35,6 +35,7 @@ var TokenAutocomplete = /** @class */ (function () {
         this.KEY_TAB = 'Tab';
         this.KEY_UP = 'ArrowUp';
         this.KEY_DOWN = 'ArrowDown';
+        this.KEY_ESC = 'Escape';
         this.defaults = {
             name: '',
             selector: '',
@@ -106,6 +107,10 @@ var TokenAutocomplete = /** @class */ (function () {
             }
         });
         this.textInput.addEventListener('keyup', function (event) {
+            if (event.key == me.KEY_ESC) {
+                me.autocomplete.hideSuggestions();
+                return;
+            }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
@@ -397,6 +402,10 @@ var TokenAutocomplete = /** @class */ (function () {
              */
             class_3.prototype.hideSuggestions = function () {
                 this.suggestions.style.display = '';
+                var suggestions = this.suggestions.querySelectorAll('li');
+                suggestions.forEach(function (suggestion) {
+                    suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+                });
             };
             /**
              * Shows the suggestions dropdown to the user.
