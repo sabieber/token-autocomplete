@@ -19,13 +19,20 @@ interface Options {
     placeholderText: string | null,
     initialTokens: Array<Token> | null,
     initialSuggestions: Array<Suggestion> | null,
+    selectMode: SelectModes,
     suggestionsUri: string,
     suggestionsUriBuilder: SuggestionUriBuilder,
     suggestionRenderer: SuggestionRenderer,
     minCharactersForSuggestion: number
 }
 
+enum SelectModes {
+    SINGLE, MULTI, SEARCH
+}
+
 interface SelectMode {
+    handleInputAsValue(input: string): void;
+
     clear(): void;
 }
 
@@ -73,6 +80,7 @@ class TokenAutocomplete {
     KEY_TAB = 'Tab';
     KEY_UP = 'ArrowUp';
     KEY_DOWN = 'ArrowDown';
+    KEY_ESC = 'Escape';
 
     options: Options;
     container: any;
@@ -90,6 +98,7 @@ class TokenAutocomplete {
         initialTokens: null,
         initialSuggestions: null,
         suggestionsUri: '',
+        selectMode: SelectModes.MULTI,
         suggestionsUriBuilder: function (query) {
             return this.suggestionsUri + '?query=' + query
         },
@@ -130,7 +139,11 @@ class TokenAutocomplete {
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
 
-        this.select = new TokenAutocomplete.MultiSelect(this);
+        if (this.options.selectMode == SelectModes.MULTI) {
+            this.select = new TokenAutocomplete.MultiSelect(this);
+        } else if (this.options.selectMode == SelectModes.SEARCH) {
+            this.select = new TokenAutocomplete.SearchMultiSelect(this);
+        }
         this.autocomplete = new TokenAutocomplete.Autocomplete(this);
 
         this.debug(false);
@@ -148,11 +161,10 @@ class TokenAutocomplete {
                     } else {
                         me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
                     }
+                    me.clearCurrentInput();
                 } else {
-                    me.select.addToken(me.getCurrentInput(), me.getCurrentInput(), null);
+                    me.select.handleInputAsValue(me.getCurrentInput());
                 }
-
-                me.clearCurrentInput();
             } else if (me.getCurrentInput() === '' && event.key == me.KEY_BACKSPACE) {
                 event.preventDefault();
                 me.select.removeLastToken();
@@ -160,6 +172,10 @@ class TokenAutocomplete {
         });
 
         this.textInput.addEventListener('keyup', function (event) {
+            if (event.key == me.KEY_ESC) {
+                me.autocomplete.hideSuggestions();
+                return;
+            }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
@@ -309,7 +325,17 @@ class TokenAutocomplete {
         }
 
         /**
-         * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
+         * Adds the current user input as a net token and resets the input area so new text can be entered.
+         *
+         * @param {string} input - the actual input the user entered
+         */
+        handleInputAsValue(input: string): void {
+            this.addToken(input, input, null);
+            this.parent.clearCurrentInput();
+        }
+
+        /**
+         * Adds a token with the specified name to the list of currently present tokens displayed to the user and the hidden select.
          *
          * @param {string} tokenValue - the actual value of the token to create
          * @param {string} tokenText - the name of the token to create
@@ -435,6 +461,22 @@ class TokenAutocomplete {
         }
     }
 
+    static SearchMultiSelect = class extends TokenAutocomplete.MultiSelect {
+        /**
+         * Instead of adding the custom user input as a token and handling it as a filter we let it remain in the input
+         * area and instead send an event so the user search request can be handled / executed.
+         *
+         * @param {string} input - the actual input the user entered
+         */
+        handleInputAsValue(input: string) {
+            this.container.dispatchEvent(new CustomEvent('query-changed', {
+                detail: {
+                    query: input
+                }
+            }));
+        }
+    }
+
     static Autocomplete = class implements Autocomplete {
 
         parent: TokenAutocomplete;
@@ -461,6 +503,11 @@ class TokenAutocomplete {
          */
         hideSuggestions() {
             this.suggestions.style.display = '';
+
+            let suggestions = this.suggestions.querySelectorAll('li');
+            suggestions.forEach(function (suggestion) {
+                suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+            })
         }
 
         /**

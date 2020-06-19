@@ -1,3 +1,16 @@
+var __extends = (this && this.__extends) || (function () {
+    var extendStatics = function (d, b) {
+        extendStatics = Object.setPrototypeOf ||
+            ({ __proto__: [] } instanceof Array && function (d, b) { d.__proto__ = b; }) ||
+            function (d, b) { for (var p in b) if (b.hasOwnProperty(p)) d[p] = b[p]; };
+        return extendStatics(d, b);
+    };
+    return function (d, b) {
+        extendStatics(d, b);
+        function __() { this.constructor = d; }
+        d.prototype = b === null ? Object.create(b) : (__.prototype = b.prototype, new __());
+    };
+})();
 var __assign = (this && this.__assign) || function () {
     __assign = Object.assign || function(t) {
         for (var s, i = 1, n = arguments.length; i < n; i++) {
@@ -9,6 +22,12 @@ var __assign = (this && this.__assign) || function () {
     };
     return __assign.apply(this, arguments);
 };
+var SelectModes;
+(function (SelectModes) {
+    SelectModes[SelectModes["SINGLE"] = 0] = "SINGLE";
+    SelectModes[SelectModes["MULTI"] = 1] = "MULTI";
+    SelectModes[SelectModes["SEARCH"] = 2] = "SEARCH";
+})(SelectModes || (SelectModes = {}));
 var TokenAutocomplete = /** @class */ (function () {
     function TokenAutocomplete(options) {
         this.KEY_BACKSPACE = 'Backspace';
@@ -16,6 +35,7 @@ var TokenAutocomplete = /** @class */ (function () {
         this.KEY_TAB = 'Tab';
         this.KEY_UP = 'ArrowUp';
         this.KEY_DOWN = 'ArrowDown';
+        this.KEY_ESC = 'Escape';
         this.defaults = {
             name: '',
             selector: '',
@@ -24,6 +44,7 @@ var TokenAutocomplete = /** @class */ (function () {
             initialTokens: null,
             initialSuggestions: null,
             suggestionsUri: '',
+            selectMode: SelectModes.MULTI,
             suggestionsUriBuilder: function (query) {
                 return this.suggestionsUri + '?query=' + query;
             },
@@ -54,7 +75,12 @@ var TokenAutocomplete = /** @class */ (function () {
         this.textInput.contentEditable = 'true';
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
-        this.select = new TokenAutocomplete.MultiSelect(this);
+        if (this.options.selectMode == SelectModes.MULTI) {
+            this.select = new TokenAutocomplete.MultiSelect(this);
+        }
+        else if (this.options.selectMode == SelectModes.SEARCH) {
+            this.select = new TokenAutocomplete.SearchMultiSelect(this);
+        }
         this.autocomplete = new TokenAutocomplete.Autocomplete(this);
         this.debug(false);
         var me = this;
@@ -69,11 +95,11 @@ var TokenAutocomplete = /** @class */ (function () {
                     else {
                         me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
                     }
+                    me.clearCurrentInput();
                 }
                 else {
-                    me.select.addToken(me.getCurrentInput(), me.getCurrentInput(), null);
+                    me.select.handleInputAsValue(me.getCurrentInput());
                 }
-                me.clearCurrentInput();
             }
             else if (me.getCurrentInput() === '' && event.key == me.KEY_BACKSPACE) {
                 event.preventDefault();
@@ -81,6 +107,10 @@ var TokenAutocomplete = /** @class */ (function () {
             }
         });
         this.textInput.addEventListener('keyup', function (event) {
+            if (event.key == me.KEY_ESC) {
+                me.autocomplete.hideSuggestions();
+                return;
+            }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
@@ -215,7 +245,16 @@ var TokenAutocomplete = /** @class */ (function () {
             this.options = parent.options;
         }
         /**
-         * Adds a token with the specified name to the list of currently prensent tokens displayed to the user and the hidden select.
+         * Adds the current user input as a net token and resets the input area so new text can be entered.
+         *
+         * @param {string} input - the actual input the user entered
+         */
+        class_1.prototype.handleInputAsValue = function (input) {
+            this.addToken(input, input, null);
+            this.parent.clearCurrentInput();
+        };
+        /**
+         * Adds a token with the specified name to the list of currently present tokens displayed to the user and the hidden select.
          *
          * @param {string} tokenValue - the actual value of the token to create
          * @param {string} tokenText - the name of the token to create
@@ -327,8 +366,28 @@ var TokenAutocomplete = /** @class */ (function () {
         };
         return class_1;
     }());
+    TokenAutocomplete.SearchMultiSelect = /** @class */ (function (_super) {
+        __extends(class_2, _super);
+        function class_2() {
+            return _super !== null && _super.apply(this, arguments) || this;
+        }
+        /**
+         * Instead of adding the custom user input as a token and handling it as a filter we let it remain in the input
+         * area and instead send an event so the user search request can be handled / executed.
+         *
+         * @param {string} input - the actual input the user entered
+         */
+        class_2.prototype.handleInputAsValue = function (input) {
+            this.container.dispatchEvent(new CustomEvent('query-changed', {
+                detail: {
+                    query: input
+                }
+            }));
+        };
+        return class_2;
+    }(TokenAutocomplete.MultiSelect));
     TokenAutocomplete.Autocomplete = (_a = /** @class */ (function () {
-            function class_2(parent) {
+            function class_3(parent) {
                 this.parent = parent;
                 this.container = parent.container;
                 this.options = parent.options;
@@ -341,23 +400,27 @@ var TokenAutocomplete = /** @class */ (function () {
             /**
              * Hides the suggestions dropdown from the user.
              */
-            class_2.prototype.hideSuggestions = function () {
+            class_3.prototype.hideSuggestions = function () {
                 this.suggestions.style.display = '';
+                var suggestions = this.suggestions.querySelectorAll('li');
+                suggestions.forEach(function (suggestion) {
+                    suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+                });
             };
             /**
              * Shows the suggestions dropdown to the user.
              */
-            class_2.prototype.showSuggestions = function () {
+            class_3.prototype.showSuggestions = function () {
                 this.suggestions.style.display = 'block';
             };
-            class_2.prototype.highlightSuggestionAtPosition = function (index) {
+            class_3.prototype.highlightSuggestionAtPosition = function (index) {
                 var suggestions = this.suggestions.querySelectorAll('li');
                 suggestions.forEach(function (suggestion) {
                     suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
                 });
                 suggestions[index].classList.add('token-autocomplete-suggestion-highlighted');
             };
-            class_2.prototype.highlightSuggestion = function (suggestion) {
+            class_3.prototype.highlightSuggestion = function (suggestion) {
                 this.suggestions.querySelectorAll('li').forEach(function (suggestion) {
                     suggestion.classList.remove('token-autocomplete-suggestion-highlighted');
                 });
@@ -366,7 +429,7 @@ var TokenAutocomplete = /** @class */ (function () {
             /**
              * Removes all previous suggestions from the dropdown.
              */
-            class_2.prototype.clearSuggestions = function () {
+            class_3.prototype.clearSuggestions = function () {
                 this.suggestions.innerHTML = '';
             };
             /**
@@ -374,7 +437,7 @@ var TokenAutocomplete = /** @class */ (function () {
              *
              * @param query the query to search suggestions for
              */
-            class_2.prototype.requestSuggestions = function (query) {
+            class_3.prototype.requestSuggestions = function (query) {
                 var me = this;
                 var request = new XMLHttpRequest();
                 request.onload = function () {
@@ -407,7 +470,7 @@ var TokenAutocomplete = /** @class */ (function () {
              *
              * @param {string} suggestion - the metadata of the suggestion that should be added
              */
-            class_2.prototype.addSuggestion = function (suggestion) {
+            class_3.prototype.addSuggestion = function (suggestion) {
                 var element = this.renderer(suggestion);
                 var value = suggestion.id || suggestion.value;
                 element.dataset.value = value;
@@ -437,7 +500,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 this.showSuggestions();
                 me.parent.log('added suggestion', suggestion);
             };
-            return class_2;
+            return class_3;
         }()),
         _a.defaultRenderer = function (suggestion) {
             var option = document.createElement('li');
