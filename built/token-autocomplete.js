@@ -225,6 +225,17 @@ var TokenAutocomplete = /** @class */ (function () {
     TokenAutocomplete.prototype.getCurrentInput = function () {
         return this.textInput.textContent || '';
     };
+    TokenAutocomplete.prototype.setCurrentInput = function (input, silent) {
+        this.textInput.textContent = input;
+        if (silent) {
+            return;
+        }
+        this.container.dispatchEvent(new CustomEvent('query-changed', {
+            detail: {
+                query: input
+            }
+        }));
+    };
     TokenAutocomplete.prototype.clearCurrentInput = function () {
         this.textInput.textContent = '';
     };

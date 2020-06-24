@@ -299,6 +299,20 @@ class TokenAutocomplete {
         return this.textInput.textContent || '';
     }
 
+    setCurrentInput(input: string, silent: boolean) {
+        this.textInput.textContent = input;
+
+        if (silent) {
+            return;
+        }
+
+        this.container.dispatchEvent(new CustomEvent('query-changed', {
+            detail: {
+                query: input
+            }
+        }));
+    }
+
     clearCurrentInput() {
         this.textInput.textContent = '';
     }
