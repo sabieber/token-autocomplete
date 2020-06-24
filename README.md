@@ -1,3 +1,8 @@
+> # Notice
+> Active development has been moved to the following fork: [scireum/token-autocomplete](https://github.com/scireum/token-autocomplete).
+> Please understand that only issues created [there](https://github.com/scireum/token-autocomplete/issues) will be investigated.
+
+
 # Vanilla JS Token Autocomplete Input
 
 Small demo: [click here](https://sabieber.github.io/token-autocomplete/)
