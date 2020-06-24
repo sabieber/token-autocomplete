@@ -156,12 +156,12 @@ class TokenAutocomplete {
 
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
+                    me.clearCurrentInput();
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
                         me.select.removeTokenWithText(highlightedSuggestion.dataset.text);
                     } else {
                         me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type, false);
                     }
-                    me.clearCurrentInput();
                 } else {
                     me.select.handleInputAsValue(me.getCurrentInput());
                 }
@@ -345,8 +345,8 @@ class TokenAutocomplete {
          * @param {string} input - the actual input the user entered
          */
         handleInputAsValue(input: string): void {
-            this.addToken(input, input, null);
             this.parent.clearCurrentInput();
+            this.addToken(input, input, null);
         }
 
         /**
@@ -616,6 +616,7 @@ class TokenAutocomplete {
                 if (suggestion.text == me.options.noMatchesText) {
                     return true;
                 }
+                me.parent.clearCurrentInput();
 
                 if (element.classList.contains('token-autocomplete-suggestion-active')) {
                     me.parent.select.removeTokenWithText(suggestion.text);
@@ -624,7 +625,6 @@ class TokenAutocomplete {
                 }
                 me.clearSuggestions();
                 me.hideSuggestions();
-                me.parent.clearCurrentInput();
             });
 
             if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestion.text + '"]') !== null) {

@@ -89,13 +89,13 @@ var TokenAutocomplete = /** @class */ (function () {
                 event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
+                    me.clearCurrentInput();
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
                         me.select.removeTokenWithText(highlightedSuggestion.dataset.text);
                     }
                     else {
                         me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type, false);
                     }
-                    me.clearCurrentInput();
                 }
                 else {
                     me.select.handleInputAsValue(me.getCurrentInput());
@@ -263,8 +263,8 @@ var TokenAutocomplete = /** @class */ (function () {
          * @param {string} input - the actual input the user entered
          */
         class_1.prototype.handleInputAsValue = function (input) {
-            this.addToken(input, input, null);
             this.parent.clearCurrentInput();
+            this.addToken(input, input, null);
         };
         /**
          * Adds a token with the specified name to the list of currently present tokens displayed to the user and the hidden select.
@@ -505,6 +505,7 @@ var TokenAutocomplete = /** @class */ (function () {
                     if (suggestion.text == me.options.noMatchesText) {
                         return true;
                     }
+                    me.parent.clearCurrentInput();
                     if (element.classList.contains('token-autocomplete-suggestion-active')) {
                         me.parent.select.removeTokenWithText(suggestion.text);
                     }
@@ -513,7 +514,6 @@ var TokenAutocomplete = /** @class */ (function () {
                     }
                     me.clearSuggestions();
                     me.hideSuggestions();
-                    me.parent.clearCurrentInput();
                 });
                 if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestion.text + '"]') !== null) {
                     element.classList.add('token-autocomplete-suggestion-active');
