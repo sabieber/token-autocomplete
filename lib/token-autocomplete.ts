@@ -33,14 +33,14 @@ enum SelectModes {
 interface SelectMode {
     handleInputAsValue(input: string): void;
 
-    clear(): void;
+    clear(silent: boolean): void;
 }
 
 interface SingleSelect extends SelectMode {
 }
 
 interface MultiSelect extends SelectMode {
-    addToken(suggestionValue: string | null, suggestionText: string | null, suggestionType: string | null): void;
+    addToken(suggestionValue: string | null, suggestionText: string | null, suggestionType: string | null, silent: boolean): void;
 
     removeToken(token: HTMLSpanElement): void;
 
@@ -156,12 +156,12 @@ class TokenAutocomplete {
 
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion !== null) {
+                    me.clearCurrentInput();
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
                         me.select.removeTokenWithText(highlightedSuggestion.dataset.text);
                     } else {
-                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type);
+                        me.select.addToken(highlightedSuggestion.dataset.value, highlightedSuggestion.dataset.text, highlightedSuggestion.dataset.type, false);
                     }
-                    me.clearCurrentInput();
                 } else {
                     me.select.handleInputAsValue(me.getCurrentInput());
                 }
@@ -266,7 +266,7 @@ class TokenAutocomplete {
         if (Array.isArray(this.options.initialTokens)) {
             this.options.initialTokens.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text, null);
+                    me.select.addToken(token.value, token.text, null, false);
                 }
             });
         }
@@ -276,19 +276,20 @@ class TokenAutocomplete {
      * Clears the currently present tokens and creates new ones from the given input value.
      *
      * @param {(Array<Token>|string)} value - either the name of a single token or a list of tokens to create
+     * @param {boolean} silent - whether appropriate events should be triggered when changing tokens or not
      */
-    val(value: Array<Token> | Token) {
-        this.select.clear();
+    val(value: Array<Token> | Token, silent: boolean = false) {
+        this.select.clear(silent);
 
         if (Array.isArray(value)) {
             let me = this;
             value.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text, null);
+                    me.select.addToken(token.value, token.text, null, silent);
                 }
             });
         } else {
-            this.select.addToken(value.value, value.text, null);
+            this.select.addToken(value.value, value.text, null, silent);
         }
     }
 
@@ -297,6 +298,20 @@ class TokenAutocomplete {
      */
     getCurrentInput() {
         return this.textInput.textContent || '';
+    }
+
+    setCurrentInput(input: string, silent: boolean) {
+        this.textInput.textContent = input;
+
+        if (silent) {
+            return;
+        }
+
+        this.container.dispatchEvent(new CustomEvent('query-changed', {
+            detail: {
+                query: input
+            }
+        }));
     }
 
     clearCurrentInput() {
@@ -330,8 +345,8 @@ class TokenAutocomplete {
          * @param {string} input - the actual input the user entered
          */
         handleInputAsValue(input: string): void {
-            this.addToken(input, input, null);
             this.parent.clearCurrentInput();
+            this.addToken(input, input, null);
         }
 
         /**
@@ -340,8 +355,9 @@ class TokenAutocomplete {
          * @param {string} tokenValue - the actual value of the token to create
          * @param {string} tokenText - the name of the token to create
          * @param {string} tokenType - the type of the token to create
+         * @param {boolean} silent - whether an appropriate event should be triggered
          */
-        addToken(tokenValue: string | null, tokenText: string | null, tokenType: string | null) {
+        addToken(tokenValue: string | null, tokenText: string | null, tokenType: string | null, silent: boolean = false) {
             if (tokenValue === null || tokenText === null) {
                 return;
             }
@@ -382,12 +398,15 @@ class TokenAutocomplete {
                 text: tokenText,
                 type: tokenType
             };
-            this.container.dispatchEvent(new CustomEvent('tokens-changed', {
-                detail: {
-                    tokens: this.currentTokens(),
-                    added: addedToken
-                }
-            }));
+
+            if (!silent) {
+                this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                    detail: {
+                        tokens: this.currentTokens(),
+                        added: addedToken
+                    }
+                }));
+            }
 
             this.parent.log('added token', token);
         }
@@ -395,12 +414,12 @@ class TokenAutocomplete {
         /**
          * Completely clears the currently present tokens from the field.
          */
-        clear() {
+        clear(silent: boolean = false) {
             let tokens: NodeListOf<HTMLElement> = this.container.querySelectorAll('.token-autocomplete-token');
 
             let me = this;
             tokens.forEach(function (token) {
-                me.removeToken(token);
+                me.removeToken(token, silent);
             });
         }
 
@@ -417,8 +436,9 @@ class TokenAutocomplete {
          * Removes the specified token from the list of currently present tokens.
          *
          * @param {Element} token - the token to remove
+         * @param {boolean} silent - whether an appropriate event should be triggered
          */
-        removeToken(token: HTMLElement) {
+        removeToken(token: HTMLElement, silent: boolean = false) {
             this.container.removeChild(token);
 
             let tokenText = token.dataset.text;
@@ -430,12 +450,15 @@ class TokenAutocomplete {
                 text: tokenText,
                 type: token.dataset.type
             }
-            this.container.dispatchEvent(new CustomEvent('tokens-changed', {
-                detail: {
-                    tokens: this.currentTokens(),
-                    removed: addedToken
-                }
-            }));
+
+            if (!silent) {
+                this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                    detail: {
+                        tokens: this.currentTokens(),
+                        removed: addedToken
+                    }
+                }));
+            }
 
             this.parent.log('removed token', token.textContent);
         }
@@ -593,15 +616,15 @@ class TokenAutocomplete {
                 if (suggestion.text == me.options.noMatchesText) {
                     return true;
                 }
+                me.parent.clearCurrentInput();
 
                 if (element.classList.contains('token-autocomplete-suggestion-active')) {
                     me.parent.select.removeTokenWithText(suggestion.text);
                 } else {
-                    me.parent.select.addToken(value, suggestion.text, suggestion.type);
+                    me.parent.select.addToken(value, suggestion.text, suggestion.type, false);
                 }
                 me.clearSuggestions();
                 me.hideSuggestions();
-                me.parent.clearCurrentInput();
             });
 
             if (this.container.querySelector('.token-autocomplete-token[data-text="' + suggestion.text + '"]') !== null) {
