@@ -266,7 +266,7 @@ class TokenAutocomplete {
         if (Array.isArray(this.options.initialTokens)) {
             this.options.initialTokens.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text, null, false);
+                    me.select.addToken(token.value, token.text, token.type, false);
                 }
             });
         }
@@ -285,11 +285,11 @@ class TokenAutocomplete {
             let me = this;
             value.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text, null, silent);
+                    me.select.addToken(token.value, token.text, token.type, silent);
                 }
             });
         } else {
-            this.select.addToken(value.value, value.text, null, silent);
+            this.select.addToken(value.value, value.text, value.type, silent);
         }
     }
 

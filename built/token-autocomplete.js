@@ -195,7 +195,7 @@ var TokenAutocomplete = /** @class */ (function () {
         if (Array.isArray(this.options.initialTokens)) {
             this.options.initialTokens.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me.select.addToken(token.value, token.text, null, false);
+                    me.select.addToken(token.value, token.text, token.type, false);
                 }
             });
         }
@@ -213,12 +213,12 @@ var TokenAutocomplete = /** @class */ (function () {
             var me_1 = this;
             value.forEach(function (token) {
                 if (typeof token === 'object') {
-                    me_1.select.addToken(token.value, token.text, null, silent);
+                    me_1.select.addToken(token.value, token.text, token.type, silent);
                 }
             });
         }
         else {
-            this.select.addToken(value.value, value.text, null, silent);
+            this.select.addToken(value.value, value.text, value.type, silent);
         }
     };
     /**
@@ -347,8 +347,8 @@ var TokenAutocomplete = /** @class */ (function () {
          * @param {boolean} silent - whether an appropriate event should be triggered
          */
         class_1.prototype.removeToken = function (token, silent) {
-            if (silent === void 0) { silent = false; }
             var _a;
+            if (silent === void 0) { silent = false; }
             this.container.removeChild(token);
             var tokenText = token.dataset.text;
             var hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
