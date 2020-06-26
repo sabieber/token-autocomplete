@@ -507,6 +507,7 @@ class TokenAutocomplete {
         options: Options;
         suggestions: HTMLUListElement;
         renderer: SuggestionRenderer;
+        request: XMLHttpRequest | null;
 
         constructor(parent: TokenAutocomplete) {
             this.parent = parent;
@@ -569,10 +570,17 @@ class TokenAutocomplete {
          */
         requestSuggestions(query: string) {
             let me = this;
-            let request = new XMLHttpRequest();
-            request.onload = function () {
-                if (Array.isArray(request.response.completions)) {
-                    request.response.completions.forEach(function (suggestion: Suggestion) {
+
+            if (me.request != null && me.request.readyState) {
+                me.request.abort();
+            }
+
+            me.request = new XMLHttpRequest();
+            me.request.onload = function () {
+                me.request = null;
+
+                if (Array.isArray(this.response.completions)) {
+                    this.response.completions.forEach(function (suggestion: Suggestion) {
                         me.addSuggestion(suggestion);
                     });
                     if (me.suggestions.childNodes.length > 0) {
@@ -589,10 +597,10 @@ class TokenAutocomplete {
                 }
             };
             let suggestionsUri = me.options.suggestionsUriBuilder(query);
-            request.open('GET', suggestionsUri, true);
-            request.responseType = 'json';
-            request.setRequestHeader('Content-type', 'application/json');
-            request.send();
+            me.request.open('GET', suggestionsUri, true);
+            me.request.responseType = 'json';
+            me.request.setRequestHeader('Content-type', 'application/json');
+            me.request.send();
         }
 
         /**

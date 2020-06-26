@@ -461,10 +461,14 @@ var TokenAutocomplete = /** @class */ (function () {
              */
             class_3.prototype.requestSuggestions = function (query) {
                 var me = this;
-                var request = new XMLHttpRequest();
-                request.onload = function () {
-                    if (Array.isArray(request.response.completions)) {
-                        request.response.completions.forEach(function (suggestion) {
+                if (me.request != null && me.request.readyState) {
+                    me.request.abort();
+                }
+                me.request = new XMLHttpRequest();
+                me.request.onload = function () {
+                    me.request = null;
+                    if (Array.isArray(this.response.completions)) {
+                        this.response.completions.forEach(function (suggestion) {
                             me.addSuggestion(suggestion);
                         });
                         if (me.suggestions.childNodes.length > 0) {
@@ -482,10 +486,10 @@ var TokenAutocomplete = /** @class */ (function () {
                     }
                 };
                 var suggestionsUri = me.options.suggestionsUriBuilder(query);
-                request.open('GET', suggestionsUri, true);
-                request.responseType = 'json';
-                request.setRequestHeader('Content-type', 'application/json');
-                request.send();
+                me.request.open('GET', suggestionsUri, true);
+                me.request.responseType = 'json';
+                me.request.setRequestHeader('Content-type', 'application/json');
+                me.request.send();
             };
             /**
              * Adds a suggestion with the given text matching the users input to the dropdown.
