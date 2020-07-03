@@ -127,37 +127,39 @@ var TokenAutocomplete = /** @class */ (function () {
                 }
                 return;
             }
-            me.autocomplete.hideSuggestions();
-            me.autocomplete.clearSuggestions();
             var value = me.getCurrentInput();
-            if (value.length >= me.options.minCharactersForSuggestion) {
-                if (Array.isArray(me.options.initialSuggestions)) {
-                    me.options.initialSuggestions.forEach(function (suggestion) {
-                        if (typeof suggestion !== 'object') {
-                            // the suggestion is of wrong type and therefore ignored
-                            return;
-                        }
-                        if (value.localeCompare(suggestion.text.slice(0, value.length), undefined, { sensitivity: 'base' }) === 0) {
-                            // The suggestion starts with the query text the user entered and will be displayed
-                            me.autocomplete.addSuggestion(suggestion);
-                        }
+            if (value.length < me.options.minCharactersForSuggestion) {
+                me.autocomplete.hideSuggestions();
+                me.autocomplete.clearSuggestions();
+                return;
+            }
+            if (Array.isArray(me.options.initialSuggestions)) {
+                me.autocomplete.clearSuggestions();
+                me.options.initialSuggestions.forEach(function (suggestion) {
+                    if (typeof suggestion !== 'object') {
+                        // the suggestion is of wrong type and therefore ignored
+                        return;
+                    }
+                    if (value.localeCompare(suggestion.text.slice(0, value.length), undefined, { sensitivity: 'base' }) === 0) {
+                        // The suggestion starts with the query text the user entered and will be displayed
+                        me.autocomplete.addSuggestion(suggestion);
+                    }
+                });
+                if (me.autocomplete.suggestions.childNodes.length > 0) {
+                    me.autocomplete.highlightSuggestionAtPosition(0);
+                }
+                else if (me.options.noMatchesText) {
+                    me.autocomplete.addSuggestion({
+                        id: null,
+                        value: '_no_match_',
+                        text: me.options.noMatchesText,
+                        type: '_no_match_',
+                        description: null
                     });
-                    if (me.autocomplete.suggestions.childNodes.length > 0) {
-                        me.autocomplete.highlightSuggestionAtPosition(0);
-                    }
-                    else if (me.options.noMatchesText) {
-                        me.autocomplete.addSuggestion({
-                            id: null,
-                            value: '_no_match_',
-                            text: me.options.noMatchesText,
-                            type: '_no_match_',
-                            description: null
-                        });
-                    }
                 }
-                else if (me.options.suggestionsUri.length > 0) {
-                    me.autocomplete.requestSuggestions(value);
-                }
+            }
+            else if (me.options.suggestionsUri.length > 0) {
+                me.autocomplete.requestSuggestions(value);
             }
         });
         this.container.tokenAutocomplete = this;
@@ -470,6 +472,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 me.request = new XMLHttpRequest();
                 me.request.onload = function () {
                     me.request = null;
+                    me.clearSuggestions();
                     if (Array.isArray(this.response.completions)) {
                         this.response.completions.forEach(function (suggestion) {
                             me.addSuggestion(suggestion);
