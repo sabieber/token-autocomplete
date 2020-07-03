@@ -318,6 +318,10 @@ class TokenAutocomplete {
         this.textInput.textContent = '';
     }
 
+    setPlaceholderText(placeholderText: string | undefined) {
+        this.textInput.dataset.placeholder = placeholderText;
+    }
+
     debug(state: boolean) {
         if (state) {
             this.log = console.log.bind(window.console);

@@ -241,6 +241,9 @@ var TokenAutocomplete = /** @class */ (function () {
     TokenAutocomplete.prototype.clearCurrentInput = function () {
         this.textInput.textContent = '';
     };
+    TokenAutocomplete.prototype.setPlaceholderText = function (placeholderText) {
+        this.textInput.dataset.placeholder = placeholderText;
+    };
     TokenAutocomplete.prototype.debug = function (state) {
         if (state) {
             this.log = console.log.bind(window.console);
