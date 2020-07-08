@@ -176,6 +176,9 @@ class TokenAutocomplete {
                 me.autocomplete.hideSuggestions();
                 return;
             }
+            if (event.key == me.KEY_ENTER) {
+                return;
+            }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
@@ -435,7 +438,9 @@ class TokenAutocomplete {
         removeLastToken() {
             let tokens = this.container.querySelectorAll('.token-autocomplete-token');
             let token = tokens[tokens.length - 1];
-            this.removeToken(token);
+            if (token) {
+                this.removeToken(token);
+            }
         }
 
         /**

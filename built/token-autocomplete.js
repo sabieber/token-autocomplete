@@ -111,6 +111,9 @@ var TokenAutocomplete = /** @class */ (function () {
                 me.autocomplete.hideSuggestions();
                 return;
             }
+            if (event.key == me.KEY_ENTER) {
+                return;
+            }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
@@ -343,7 +346,9 @@ var TokenAutocomplete = /** @class */ (function () {
         class_1.prototype.removeLastToken = function () {
             var tokens = this.container.querySelectorAll('.token-autocomplete-token');
             var token = tokens[tokens.length - 1];
-            this.removeToken(token);
+            if (token) {
+                this.removeToken(token);
+            }
         };
         /**
          * Removes the specified token from the list of currently present tokens.
