@@ -172,11 +172,8 @@ class TokenAutocomplete {
         });
 
         this.textInput.addEventListener('keyup', function (event) {
-            if (event.key == me.KEY_ESC) {
+            if (event.key == me.KEY_ESC || event.key == me.KEY_ENTER) {
                 me.autocomplete.hideSuggestions();
-                return;
-            }
-            if (event.key == me.KEY_ENTER) {
                 return;
             }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
