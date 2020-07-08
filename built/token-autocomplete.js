@@ -111,6 +111,9 @@ var TokenAutocomplete = /** @class */ (function () {
                 me.autocomplete.hideSuggestions();
                 return;
             }
+            if (event.key == me.KEY_ENTER) {
+                return;
+            }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
