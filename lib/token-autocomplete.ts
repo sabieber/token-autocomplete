@@ -438,7 +438,9 @@ class TokenAutocomplete {
         removeLastToken() {
             let tokens = this.container.querySelectorAll('.token-autocomplete-token');
             let token = tokens[tokens.length - 1];
-            this.removeToken(token);
+            if (token) {
+                this.removeToken(token);
+            }
         }
 
         /**

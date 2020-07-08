@@ -346,7 +346,9 @@ var TokenAutocomplete = /** @class */ (function () {
         class_1.prototype.removeLastToken = function () {
             var tokens = this.container.querySelectorAll('.token-autocomplete-token');
             var token = tokens[tokens.length - 1];
-            this.removeToken(token);
+            if (token) {
+                this.removeToken(token);
+            }
         };
         /**
          * Removes the specified token from the list of currently present tokens.
