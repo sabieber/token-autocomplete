@@ -88,6 +88,9 @@ var TokenAutocomplete = /** @class */ (function () {
             if (event.key == me.KEY_ENTER || event.key == me.KEY_TAB) {
                 event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
+                if (highlightedSuggestion == null && event.key == me.KEY_TAB) {
+                    highlightedSuggestion = me.autocomplete.suggestions.firstChild;
+                }
                 if (highlightedSuggestion !== null) {
                     me.clearCurrentInput();
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
@@ -105,6 +108,9 @@ var TokenAutocomplete = /** @class */ (function () {
                 event.preventDefault();
                 me.select.removeLastToken();
             }
+            if ((event.key == me.KEY_DOWN || event.key == me.KEY_UP) && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
+            }
         });
         this.textInput.addEventListener('keyup', function (event) {
             if (event.key == me.KEY_ESC || event.key == me.KEY_ENTER) {
@@ -112,15 +118,23 @@ var TokenAutocomplete = /** @class */ (function () {
                 return;
             }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
                 if (aboveSuggestion != null) {
                     me.autocomplete.highlightSuggestion(aboveSuggestion);
                 }
+                else {
+                    highlightedSuggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+                }
                 return;
             }
             if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
+                if (highlightedSuggestion == null) {
+                    me.autocomplete.highlightSuggestionAtPosition(0);
+                }
                 var belowSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.nextSibling;
                 if (belowSuggestion != null) {
                     me.autocomplete.highlightSuggestion(belowSuggestion);
@@ -145,10 +159,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.autocomplete.addSuggestion(suggestion);
                     }
                 });
-                if (me.autocomplete.suggestions.childNodes.length > 0) {
-                    me.autocomplete.highlightSuggestionAtPosition(0);
-                }
-                else if (me.options.noMatchesText) {
+                if (me.autocomplete.suggestions.childNodes.length == 0 && me.options.noMatchesText) {
                     me.autocomplete.addSuggestion({
                         id: null,
                         value: '_no_match_',
@@ -479,10 +490,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         this.response.completions.forEach(function (suggestion) {
                             me.addSuggestion(suggestion);
                         });
-                        if (me.suggestions.childNodes.length > 0) {
-                            me.highlightSuggestionAtPosition(0);
-                        }
-                        else if (me.options.noMatchesText) {
+                        if (me.suggestions.childNodes.length == 0 && me.options.noMatchesText) {
                             me.addSuggestion({
                                 id: null,
                                 value: '_no_match_',
