@@ -188,6 +188,9 @@ class TokenAutocomplete {
             }
             if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
+                if(highlightedSuggestion == null) {
+                    me.autocomplete.highlightSuggestionAtPosition(0);
+                }
                 let belowSuggestion = highlightedSuggestion?.nextSibling;
                 if (belowSuggestion != null) {
                     me.autocomplete.highlightSuggestion(belowSuggestion as Element);

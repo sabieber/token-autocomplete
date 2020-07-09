@@ -124,6 +124,9 @@ var TokenAutocomplete = /** @class */ (function () {
             }
             if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
+                if (highlightedSuggestion == null) {
+                    me.autocomplete.highlightSuggestionAtPosition(0);
+                }
                 var belowSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.nextSibling;
                 if (belowSuggestion != null) {
                     me.autocomplete.highlightSuggestion(belowSuggestion);
