@@ -88,6 +88,9 @@ var TokenAutocomplete = /** @class */ (function () {
             if (event.key == me.KEY_ENTER || event.key == me.KEY_TAB) {
                 event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
+                if (highlightedSuggestion == null && event.key == me.KEY_TAB) {
+                    highlightedSuggestion = me.autocomplete.suggestions.firstChild;
+                }
                 if (highlightedSuggestion !== null) {
                     me.clearCurrentInput();
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {

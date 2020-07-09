@@ -155,6 +155,11 @@ class TokenAutocomplete {
                 event.preventDefault();
 
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
+
+                if (highlightedSuggestion == null && event.key == me.KEY_TAB) {
+                    highlightedSuggestion = me.autocomplete.suggestions.firstChild;
+                }
+
                 if (highlightedSuggestion !== null) {
                     me.clearCurrentInput();
                     if (highlightedSuggestion.classList.contains('token-autocomplete-suggestion-active')) {
