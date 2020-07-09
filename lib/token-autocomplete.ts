@@ -188,7 +188,7 @@ class TokenAutocomplete {
             }
             if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                if(highlightedSuggestion == null) {
+                if (highlightedSuggestion == null) {
                     me.autocomplete.highlightSuggestionAtPosition(0);
                 }
                 let belowSuggestion = highlightedSuggestion?.nextSibling;
@@ -217,9 +217,7 @@ class TokenAutocomplete {
                         me.autocomplete.addSuggestion(suggestion);
                     }
                 });
-                if (me.autocomplete.suggestions.childNodes.length > 0) {
-                    me.autocomplete.highlightSuggestionAtPosition(0);
-                } else if (me.options.noMatchesText) {
+                if (me.autocomplete.suggestions.childNodes.length == 0 && me.options.noMatchesText) {
                     me.autocomplete.addSuggestion({
                         id: null,
                         value: '_no_match_',
@@ -597,9 +595,7 @@ class TokenAutocomplete {
                     this.response.completions.forEach(function (suggestion: Suggestion) {
                         me.addSuggestion(suggestion);
                     });
-                    if (me.suggestions.childNodes.length > 0) {
-                        me.highlightSuggestionAtPosition(0);
-                    } else if (me.options.noMatchesText) {
+                    if (me.suggestions.childNodes.length == 0 && me.options.noMatchesText) {
                         me.addSuggestion({
                             id: null,
                             value: '_no_match_',

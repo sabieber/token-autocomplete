@@ -151,10 +151,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         me.autocomplete.addSuggestion(suggestion);
                     }
                 });
-                if (me.autocomplete.suggestions.childNodes.length > 0) {
-                    me.autocomplete.highlightSuggestionAtPosition(0);
-                }
-                else if (me.options.noMatchesText) {
+                if (me.autocomplete.suggestions.childNodes.length == 0 && me.options.noMatchesText) {
                     me.autocomplete.addSuggestion({
                         id: null,
                         value: '_no_match_',
@@ -485,10 +482,7 @@ var TokenAutocomplete = /** @class */ (function () {
                         this.response.completions.forEach(function (suggestion) {
                             me.addSuggestion(suggestion);
                         });
-                        if (me.suggestions.childNodes.length > 0) {
-                            me.highlightSuggestionAtPosition(0);
-                        }
-                        else if (me.options.noMatchesText) {
+                        if (me.suggestions.childNodes.length == 0 && me.options.noMatchesText) {
                             me.addSuggestion({
                                 id: null,
                                 value: '_no_match_',
