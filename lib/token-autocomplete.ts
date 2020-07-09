@@ -181,6 +181,8 @@ class TokenAutocomplete {
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
                 if (aboveSuggestion != null) {
                     me.autocomplete.highlightSuggestion(aboveSuggestion as Element);
+                } else {
+                    highlightedSuggestion.classList.remove('token-autocomplete-suggestion-highlighted');
                 }
                 return;
             }

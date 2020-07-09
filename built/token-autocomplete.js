@@ -117,6 +117,9 @@ var TokenAutocomplete = /** @class */ (function () {
                 if (aboveSuggestion != null) {
                     me.autocomplete.highlightSuggestion(aboveSuggestion);
                 }
+                else {
+                    highlightedSuggestion.classList.remove('token-autocomplete-suggestion-highlighted');
+                }
                 return;
             }
             if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
