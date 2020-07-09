@@ -108,6 +108,9 @@ var TokenAutocomplete = /** @class */ (function () {
                 event.preventDefault();
                 me.select.removeLastToken();
             }
+            if ((event.key == me.KEY_DOWN || event.key == me.KEY_UP) && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
+            }
         });
         this.textInput.addEventListener('keyup', function (event) {
             if (event.key == me.KEY_ESC || event.key == me.KEY_ENTER) {
@@ -115,6 +118,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 return;
             }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
                 if (aboveSuggestion != null) {
@@ -126,6 +130,7 @@ var TokenAutocomplete = /** @class */ (function () {
                 return;
             }
             if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion == null) {
                     me.autocomplete.highlightSuggestionAtPosition(0);

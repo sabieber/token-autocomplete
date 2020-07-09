@@ -174,6 +174,9 @@ class TokenAutocomplete {
                 event.preventDefault();
                 me.select.removeLastToken();
             }
+            if ((event.key == me.KEY_DOWN || event.key == me.KEY_UP) && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
+            }
         });
 
         this.textInput.addEventListener('keyup', function (event) {
@@ -182,6 +185,7 @@ class TokenAutocomplete {
                 return;
             }
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 let aboveSuggestion = highlightedSuggestion?.previousSibling;
                 if (aboveSuggestion != null) {
@@ -192,6 +196,7 @@ class TokenAutocomplete {
                 return;
             }
             if (event.key == me.KEY_DOWN && me.autocomplete.suggestions.childNodes.length > 0) {
+                event.preventDefault();
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion == null) {
                     me.autocomplete.highlightSuggestionAtPosition(0);
