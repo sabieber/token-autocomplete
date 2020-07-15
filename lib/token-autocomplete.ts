@@ -19,6 +19,7 @@ interface Options {
     placeholderText: string | null,
     initialTokens: Array<Token> | null,
     initialSuggestions: Array<Suggestion> | null,
+    tokenRenderer: TokenRenderer,
     selectMode: SelectModes,
     suggestionsUri: string,
     suggestionsUriBuilder: SuggestionUriBuilder,
@@ -65,6 +66,10 @@ interface Autocomplete {
     highlightSuggestion(arg0: Element): void;
 }
 
+interface TokenRenderer {
+    (token: Token): HTMLElement;
+}
+
 interface SuggestionRenderer {
     (suggestion: Suggestion): HTMLElement;
 }
@@ -97,6 +102,7 @@ class TokenAutocomplete {
         placeholderText: 'enter some text',
         initialTokens: null,
         initialSuggestions: null,
+        tokenRenderer: TokenAutocomplete.MultiSelect.defaultRenderer,
         suggestionsUri: '',
         selectMode: SelectModes.MULTI,
         suggestionsUriBuilder: function (query) {
@@ -351,11 +357,13 @@ class TokenAutocomplete {
         parent: TokenAutocomplete;
         container: any;
         options: Options;
+        renderer: TokenRenderer;
 
         constructor(parent: TokenAutocomplete) {
             this.parent = parent;
             this.container = parent.container;
             this.options = parent.options;
+            this.renderer = parent.options.tokenRenderer;
         }
 
         /**
@@ -391,32 +399,20 @@ class TokenAutocomplete {
             }
             this.parent.hiddenSelect.add(option);
 
-            let token = document.createElement('span');
-            token.classList.add('token-autocomplete-token');
-            token.dataset.text = tokenText;
-            token.dataset.value = tokenValue;
-            if (tokenType != null) {
-                token.dataset.type = tokenType;
-            }
-            token.textContent = tokenText;
-
-            let deleteToken = document.createElement('span');
-            deleteToken.classList.add('token-autocomplete-token-delete');
-            deleteToken.textContent = '\u00D7';
-            token.appendChild(deleteToken);
-
-            let me = this;
-            deleteToken.addEventListener('click', function () {
-                me.removeToken(token);
-            });
-
-            this.container.insertBefore(token, this.parent.textInput);
-
             let addedToken = {
                 value: tokenValue,
                 text: tokenText,
                 type: tokenType
             };
+
+            let element = this.renderer(addedToken);
+
+            let me = this;
+            element.querySelector('.token-autocomplete-token-delete')?.addEventListener('click', function () {
+                me.removeToken(element);
+            });
+
+            this.container.insertBefore(element, this.parent.textInput);
 
             if (!silent) {
                 this.container.dispatchEvent(new CustomEvent('tokens-changed', {
@@ -427,7 +423,7 @@ class TokenAutocomplete {
                 }));
             }
 
-            this.parent.log('added token', token);
+            this.parent.log('added token', addedToken);
         }
 
         /**
@@ -502,6 +498,24 @@ class TokenAutocomplete {
                 }
             })
             return tokens;
+        }
+
+        static defaultRenderer: TokenRenderer = function (token: Token): HTMLElement {
+            const chip = document.createElement('span');
+            chip.classList.add('token-autocomplete-token');
+            chip.dataset.text = token.text;
+            chip.dataset.value = token.value;
+            if (token.type != null) {
+                chip.dataset.type = token.type;
+            }
+            chip.textContent = token.text;
+
+            let deleteToken = document.createElement('span');
+            deleteToken.classList.add('token-autocomplete-token-delete');
+            deleteToken.textContent = '\u00D7';
+            chip.appendChild(deleteToken);
+
+            return chip;
         }
     }
 
