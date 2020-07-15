@@ -43,6 +43,7 @@ var TokenAutocomplete = /** @class */ (function () {
             placeholderText: 'enter some text',
             initialTokens: null,
             initialSuggestions: null,
+            tokenRenderer: TokenAutocomplete.MultiSelect.defaultRenderer,
             suggestionsUri: '',
             selectMode: SelectModes.MULTI,
             suggestionsUriBuilder: function (query) {
@@ -266,146 +267,153 @@ var TokenAutocomplete = /** @class */ (function () {
             };
         }
     };
-    var _a;
-    TokenAutocomplete.MultiSelect = /** @class */ (function () {
-        function class_1(parent) {
-            this.parent = parent;
-            this.container = parent.container;
-            this.options = parent.options;
-        }
-        /**
-         * Adds the current user input as a net token and resets the input area so new text can be entered.
-         *
-         * @param {string} input - the actual input the user entered
-         */
-        class_1.prototype.handleInputAsValue = function (input) {
-            this.parent.clearCurrentInput();
-            this.addToken(input, input, null);
-        };
-        /**
-         * Adds a token with the specified name to the list of currently present tokens displayed to the user and the hidden select.
-         *
-         * @param {string} tokenValue - the actual value of the token to create
-         * @param {string} tokenText - the name of the token to create
-         * @param {string} tokenType - the type of the token to create
-         * @param {boolean} silent - whether an appropriate event should be triggered
-         */
-        class_1.prototype.addToken = function (tokenValue, tokenText, tokenType, silent) {
-            if (silent === void 0) { silent = false; }
-            if (tokenValue === null || tokenText === null) {
-                return;
+    var _a, _b;
+    TokenAutocomplete.MultiSelect = (_a = /** @class */ (function () {
+            function class_1(parent) {
+                this.parent = parent;
+                this.container = parent.container;
+                this.options = parent.options;
+                this.renderer = parent.options.tokenRenderer;
             }
-            var option = document.createElement('option');
-            option.text = tokenText;
-            option.value = tokenValue;
-            option.setAttribute('selected', 'true');
-            option.dataset.text = tokenText;
-            option.dataset.value = tokenValue;
-            if (tokenType != null) {
-                option.dataset.type = tokenType;
+            /**
+             * Adds the current user input as a net token and resets the input area so new text can be entered.
+             *
+             * @param {string} input - the actual input the user entered
+             */
+            class_1.prototype.handleInputAsValue = function (input) {
+                this.parent.clearCurrentInput();
+                this.addToken(input, input, null);
+            };
+            /**
+             * Adds a token with the specified name to the list of currently present tokens displayed to the user and the hidden select.
+             *
+             * @param {string} tokenValue - the actual value of the token to create
+             * @param {string} tokenText - the name of the token to create
+             * @param {string} tokenType - the type of the token to create
+             * @param {boolean} silent - whether an appropriate event should be triggered
+             */
+            class_1.prototype.addToken = function (tokenValue, tokenText, tokenType, silent) {
+                var _a;
+                if (silent === void 0) { silent = false; }
+                if (tokenValue === null || tokenText === null) {
+                    return;
+                }
+                var option = document.createElement('option');
+                option.text = tokenText;
+                option.value = tokenValue;
+                option.setAttribute('selected', 'true');
+                option.dataset.text = tokenText;
+                option.dataset.value = tokenValue;
+                if (tokenType != null) {
+                    option.dataset.type = tokenType;
+                }
+                this.parent.hiddenSelect.add(option);
+                var addedToken = {
+                    value: tokenValue,
+                    text: tokenText,
+                    type: tokenType
+                };
+                var element = this.renderer(addedToken);
+                var me = this;
+                (_a = element.querySelector('.token-autocomplete-token-delete')) === null || _a === void 0 ? void 0 : _a.addEventListener('click', function () {
+                    me.removeToken(element);
+                });
+                this.container.insertBefore(element, this.parent.textInput);
+                if (!silent) {
+                    this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                        detail: {
+                            tokens: this.currentTokens(),
+                            added: addedToken
+                        }
+                    }));
+                }
+                this.parent.log('added token', addedToken);
+            };
+            /**
+             * Completely clears the currently present tokens from the field.
+             */
+            class_1.prototype.clear = function (silent) {
+                if (silent === void 0) { silent = false; }
+                var tokens = this.container.querySelectorAll('.token-autocomplete-token');
+                var me = this;
+                tokens.forEach(function (token) {
+                    me.removeToken(token, silent);
+                });
+            };
+            /**
+             * Removes the last token in the list of currently present token. This is the last added token next to the input field.
+             */
+            class_1.prototype.removeLastToken = function () {
+                var tokens = this.container.querySelectorAll('.token-autocomplete-token');
+                var token = tokens[tokens.length - 1];
+                if (token) {
+                    this.removeToken(token);
+                }
+            };
+            /**
+             * Removes the specified token from the list of currently present tokens.
+             *
+             * @param {Element} token - the token to remove
+             * @param {boolean} silent - whether an appropriate event should be triggered
+             */
+            class_1.prototype.removeToken = function (token, silent) {
+                var _a;
+                if (silent === void 0) { silent = false; }
+                this.container.removeChild(token);
+                var tokenText = token.dataset.text;
+                var hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
+                (_a = hiddenOption === null || hiddenOption === void 0 ? void 0 : hiddenOption.parentElement) === null || _a === void 0 ? void 0 : _a.removeChild(hiddenOption);
+                var addedToken = {
+                    value: token.dataset.value,
+                    text: tokenText,
+                    type: token.dataset.type
+                };
+                if (!silent) {
+                    this.container.dispatchEvent(new CustomEvent('tokens-changed', {
+                        detail: {
+                            tokens: this.currentTokens(),
+                            removed: addedToken
+                        }
+                    }));
+                }
+                this.parent.log('removed token', token.textContent);
+            };
+            class_1.prototype.removeTokenWithText = function (tokenText) {
+                if (tokenText === null) {
+                    return;
+                }
+                var token = this.container.querySelector('.token-autocomplete-token[data-text="' + tokenText + '"]');
+                if (token !== null) {
+                    this.removeToken(token);
+                }
+            };
+            class_1.prototype.currentTokens = function () {
+                var tokens = [];
+                this.parent.hiddenSelect.querySelectorAll('option').forEach(function (option) {
+                    if (option.dataset.value != null) {
+                        tokens.push(option.dataset.value);
+                    }
+                });
+                return tokens;
+            };
+            return class_1;
+        }()),
+        _a.defaultRenderer = function (token) {
+            var chip = document.createElement('span');
+            chip.classList.add('token-autocomplete-token');
+            chip.dataset.text = token.text;
+            chip.dataset.value = token.value;
+            if (token.type != null) {
+                chip.dataset.type = token.type;
             }
-            this.parent.hiddenSelect.add(option);
-            var token = document.createElement('span');
-            token.classList.add('token-autocomplete-token');
-            token.dataset.text = tokenText;
-            token.dataset.value = tokenValue;
-            if (tokenType != null) {
-                token.dataset.type = tokenType;
-            }
-            token.textContent = tokenText;
+            chip.textContent = token.text;
             var deleteToken = document.createElement('span');
             deleteToken.classList.add('token-autocomplete-token-delete');
             deleteToken.textContent = '\u00D7';
-            token.appendChild(deleteToken);
-            var me = this;
-            deleteToken.addEventListener('click', function () {
-                me.removeToken(token);
-            });
-            this.container.insertBefore(token, this.parent.textInput);
-            var addedToken = {
-                value: tokenValue,
-                text: tokenText,
-                type: tokenType
-            };
-            if (!silent) {
-                this.container.dispatchEvent(new CustomEvent('tokens-changed', {
-                    detail: {
-                        tokens: this.currentTokens(),
-                        added: addedToken
-                    }
-                }));
-            }
-            this.parent.log('added token', token);
-        };
-        /**
-         * Completely clears the currently present tokens from the field.
-         */
-        class_1.prototype.clear = function (silent) {
-            if (silent === void 0) { silent = false; }
-            var tokens = this.container.querySelectorAll('.token-autocomplete-token');
-            var me = this;
-            tokens.forEach(function (token) {
-                me.removeToken(token, silent);
-            });
-        };
-        /**
-         * Removes the last token in the list of currently present token. This is the last added token next to the input field.
-         */
-        class_1.prototype.removeLastToken = function () {
-            var tokens = this.container.querySelectorAll('.token-autocomplete-token');
-            var token = tokens[tokens.length - 1];
-            if (token) {
-                this.removeToken(token);
-            }
-        };
-        /**
-         * Removes the specified token from the list of currently present tokens.
-         *
-         * @param {Element} token - the token to remove
-         * @param {boolean} silent - whether an appropriate event should be triggered
-         */
-        class_1.prototype.removeToken = function (token, silent) {
-            var _a;
-            if (silent === void 0) { silent = false; }
-            this.container.removeChild(token);
-            var tokenText = token.dataset.text;
-            var hiddenOption = this.parent.hiddenSelect.querySelector('option[data-text="' + tokenText + '"]');
-            (_a = hiddenOption === null || hiddenOption === void 0 ? void 0 : hiddenOption.parentElement) === null || _a === void 0 ? void 0 : _a.removeChild(hiddenOption);
-            var addedToken = {
-                value: token.dataset.value,
-                text: tokenText,
-                type: token.dataset.type
-            };
-            if (!silent) {
-                this.container.dispatchEvent(new CustomEvent('tokens-changed', {
-                    detail: {
-                        tokens: this.currentTokens(),
-                        removed: addedToken
-                    }
-                }));
-            }
-            this.parent.log('removed token', token.textContent);
-        };
-        class_1.prototype.removeTokenWithText = function (tokenText) {
-            if (tokenText === null) {
-                return;
-            }
-            var token = this.container.querySelector('.token-autocomplete-token[data-text="' + tokenText + '"]');
-            if (token !== null) {
-                this.removeToken(token);
-            }
-        };
-        class_1.prototype.currentTokens = function () {
-            var tokens = [];
-            this.parent.hiddenSelect.querySelectorAll('option').forEach(function (option) {
-                if (option.dataset.value != null) {
-                    tokens.push(option.dataset.value);
-                }
-            });
-            return tokens;
-        };
-        return class_1;
-    }());
+            chip.appendChild(deleteToken);
+            return chip;
+        },
+        _a);
     TokenAutocomplete.SearchMultiSelect = /** @class */ (function (_super) {
         __extends(class_2, _super);
         function class_2() {
@@ -426,7 +434,7 @@ var TokenAutocomplete = /** @class */ (function () {
         };
         return class_2;
     }(TokenAutocomplete.MultiSelect));
-    TokenAutocomplete.Autocomplete = (_a = /** @class */ (function () {
+    TokenAutocomplete.Autocomplete = (_b = /** @class */ (function () {
             function class_3(parent) {
                 this.parent = parent;
                 this.container = parent.container;
@@ -544,7 +552,7 @@ var TokenAutocomplete = /** @class */ (function () {
             };
             return class_3;
         }()),
-        _a.defaultRenderer = function (suggestion) {
+        _b.defaultRenderer = function (suggestion) {
             var option = document.createElement('li');
             option.textContent = suggestion.text;
             if (suggestion.description) {
@@ -555,7 +563,7 @@ var TokenAutocomplete = /** @class */ (function () {
             }
             return option;
         },
-        _a);
+        _b);
     return TokenAutocomplete;
 }());
 //# sourceMappingURL=token-autocomplete.js.map
