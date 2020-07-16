@@ -141,6 +141,11 @@ class TokenAutocomplete {
             this.textInput.dataset.placeholder = this.options.placeholderText;
         }
         this.textInput.contentEditable = 'true';
+        this.textInput.addEventListener("paste", function (event) {
+            event.preventDefault();
+            const text = event.clipboardData?.getData("text/plain");
+            document.execCommand("insertHTML", false, text);
+        });
 
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);

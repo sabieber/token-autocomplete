@@ -74,6 +74,12 @@ var TokenAutocomplete = /** @class */ (function () {
             this.textInput.dataset.placeholder = this.options.placeholderText;
         }
         this.textInput.contentEditable = 'true';
+        this.textInput.addEventListener("paste", function (event) {
+            var _a;
+            event.preventDefault();
+            var text = (_a = event.clipboardData) === null || _a === void 0 ? void 0 : _a.getData("text/plain");
+            document.execCommand("insertHTML", false, text);
+        });
         this.container.appendChild(this.textInput);
         this.container.appendChild(this.hiddenSelect);
         if (this.options.selectMode == SelectModes.MULTI) {
