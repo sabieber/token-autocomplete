@@ -63,6 +63,8 @@ interface Autocomplete {
 
     hideSuggestions(): void;
 
+    areSuggestionsDisplayed(): boolean;
+
     highlightSuggestion(arg0: Element): void;
 }
 
@@ -167,7 +169,7 @@ class TokenAutocomplete {
 
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
 
-                if (highlightedSuggestion == null && event.key == me.KEY_TAB) {
+                if (highlightedSuggestion == null && event.key == me.KEY_TAB && me.autocomplete.areSuggestionsDisplayed()) {
                     highlightedSuggestion = me.autocomplete.suggestions.firstChild;
                 }
 
@@ -579,6 +581,10 @@ class TokenAutocomplete {
          */
         showSuggestions() {
             this.suggestions.style.display = 'block';
+        }
+
+        areSuggestionsDisplayed() {
+            return this.suggestions.style.display === 'block';
         }
 
         highlightSuggestionAtPosition(index: number) {

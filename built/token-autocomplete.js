@@ -95,7 +95,7 @@ var TokenAutocomplete = /** @class */ (function () {
             if (event.key == me.KEY_ENTER || event.key == me.KEY_TAB) {
                 event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                if (highlightedSuggestion == null && event.key == me.KEY_TAB) {
+                if (highlightedSuggestion == null && event.key == me.KEY_TAB && me.autocomplete.areSuggestionsDisplayed()) {
                     highlightedSuggestion = me.autocomplete.suggestions.firstChild;
                 }
                 if (highlightedSuggestion !== null) {
@@ -466,6 +466,9 @@ var TokenAutocomplete = /** @class */ (function () {
              */
             class_3.prototype.showSuggestions = function () {
                 this.suggestions.style.display = 'block';
+            };
+            class_3.prototype.areSuggestionsDisplayed = function () {
+                return this.suggestions.style.display === 'block';
             };
             class_3.prototype.highlightSuggestionAtPosition = function (index) {
                 var suggestions = this.suggestions.querySelectorAll('li');
