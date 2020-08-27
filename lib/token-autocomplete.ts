@@ -87,6 +87,8 @@ class TokenAutocomplete {
     KEY_TAB = 'Tab';
     KEY_UP = 'ArrowUp';
     KEY_DOWN = 'ArrowDown';
+    KEY_LEFT = 'ArrowLeft';
+    KEY_RIGHT = 'ArrowRight';
     KEY_ESC = 'Escape';
 
     options: Options;
@@ -218,6 +220,10 @@ class TokenAutocomplete {
                 if (belowSuggestion != null) {
                     me.autocomplete.highlightSuggestion(belowSuggestion as Element);
                 }
+                return;
+            }
+            if (event.key == me.KEY_LEFT || event.key == me.KEY_RIGHT) {
+                // We dont want to retrigger the autocompletion when the user navigates the cursor inside the input.
                 return;
             }
 

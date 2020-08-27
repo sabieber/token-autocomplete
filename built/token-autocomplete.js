@@ -35,6 +35,8 @@ var TokenAutocomplete = /** @class */ (function () {
         this.KEY_TAB = 'Tab';
         this.KEY_UP = 'ArrowUp';
         this.KEY_DOWN = 'ArrowDown';
+        this.KEY_LEFT = 'ArrowLeft';
+        this.KEY_RIGHT = 'ArrowRight';
         this.KEY_ESC = 'Escape';
         this.defaults = {
             name: '',
@@ -146,6 +148,10 @@ var TokenAutocomplete = /** @class */ (function () {
                 if (belowSuggestion != null) {
                     me.autocomplete.highlightSuggestion(belowSuggestion);
                 }
+                return;
+            }
+            if (event.key == me.KEY_LEFT || event.key == me.KEY_RIGHT) {
+                // We dont want to retrigger the autocompletion when the user navigates the cursor inside the input.
                 return;
             }
             var value = me.getCurrentInput();
