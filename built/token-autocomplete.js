@@ -129,7 +129,11 @@ var TokenAutocomplete = /** @class */ (function () {
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 event.preventDefault();
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                var aboveSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.previousSibling;
+                if (highlightedSuggestion == null) {
+                    me.autocomplete.highlightSuggestionAtPosition(me.autocomplete.suggestions.childNodes.length - 1);
+                    return;
+                }
+                var aboveSuggestion = highlightedSuggestion.previousSibling;
                 if (aboveSuggestion != null) {
                     me.autocomplete.highlightSuggestion(aboveSuggestion);
                 }
@@ -143,10 +147,14 @@ var TokenAutocomplete = /** @class */ (function () {
                 var highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion == null) {
                     me.autocomplete.highlightSuggestionAtPosition(0);
+                    return;
                 }
                 var belowSuggestion = highlightedSuggestion === null || highlightedSuggestion === void 0 ? void 0 : highlightedSuggestion.nextSibling;
                 if (belowSuggestion != null) {
                     me.autocomplete.highlightSuggestion(belowSuggestion);
+                }
+                else {
+                    highlightedSuggestion.classList.remove('token-autocomplete-suggestion-highlighted');
                 }
                 return;
             }

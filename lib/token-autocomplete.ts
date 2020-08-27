@@ -202,7 +202,11 @@ class TokenAutocomplete {
             if (event.key == me.KEY_UP && me.autocomplete.suggestions.childNodes.length > 0) {
                 event.preventDefault();
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
-                let aboveSuggestion = highlightedSuggestion?.previousSibling;
+                if (highlightedSuggestion == null) {
+                    me.autocomplete.highlightSuggestionAtPosition(me.autocomplete.suggestions.childNodes.length - 1);
+                    return;
+                }
+                let aboveSuggestion = highlightedSuggestion.previousSibling;
                 if (aboveSuggestion != null) {
                     me.autocomplete.highlightSuggestion(aboveSuggestion as Element);
                 } else {
@@ -215,10 +219,13 @@ class TokenAutocomplete {
                 let highlightedSuggestion = me.autocomplete.suggestions.querySelector('.token-autocomplete-suggestion-highlighted');
                 if (highlightedSuggestion == null) {
                     me.autocomplete.highlightSuggestionAtPosition(0);
+                    return;
                 }
                 let belowSuggestion = highlightedSuggestion?.nextSibling;
                 if (belowSuggestion != null) {
                     me.autocomplete.highlightSuggestion(belowSuggestion as Element);
+                } else {
+                    highlightedSuggestion.classList.remove('token-autocomplete-suggestion-highlighted');
                 }
                 return;
             }
